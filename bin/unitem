@@ -1,0 +1,223 @@
+#!/srv/sw/python/2.7.4/bin/python
+###############################################################################
+#                                                                             #
+#    This program is free software: you can redistribute it and/or modify     #
+#    it under the terms of the GNU General Public License as published by     #
+#    the Free Software Foundation, either version 3 of the License, or        #
+#    (at your option) any later version.                                      #
+#                                                                             #
+#    This program is distributed in the hope that it will be useful,          #
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of           #
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            #
+#    GNU General Public License for more details.                             #
+#                                                                             #
+#    You should have received a copy of the GNU General Public License        #
+#    along with this program. If not, see <http://www.gnu.org/licenses/>.     #
+#                                                                             #
+###############################################################################
+
+__author__ = "Donovan Parks"
+__copyright__ = "Copyright 2017"
+__credits__ = ["Donovan Parks"]
+__license__ = "GPL3"
+__maintainer__ = "Donovan Parks"
+__email__ = "donovan.parks@gmail.com"
+__status__ = "Development"
+
+import os
+import sys
+import tempfile
+import argparse
+
+from unitem import version
+from unitem.main import OptionsParser
+
+from biolib.common import make_sure_path_exists
+from biolib.logger import logger_setup
+from biolib.misc.custom_help_formatter import CustomHelpFormatter, ChangeTempAction
+
+
+def print_help():
+    """Help menu."""
+
+    print ''
+    print '                ...::: UniteM v' + version() + ' :::...'''
+    print '''\
+
+  Profiling:
+    profile -> Identify marker genes and calculate assembly statistics
+   
+  Bin selection:
+    consensus -> Consensus clustering across multiple binning methods
+    greedy    -> Greedy bin selection across multiple binning methods
+    unanimous -> Unanimous bin filtering across multiple binning methods
+
+  Utility functions:
+    compare  -> Compare bins from two binning methods
+    unique   -> Ensure sequences are not assigned to multiple bins
+
+  Use: unitem <command> -h for command specific help.
+
+  Feature requests or bug reports can be sent to Donovan Parks (donovan.parks@gmail.com)
+    or posted on GitHub (https://github.com/dparks1134/unitem).
+    '''
+
+if __name__ == '__main__':
+
+    # initialize the options parser
+    parser = argparse.ArgumentParser(add_help=False)
+    subparsers = parser.add_subparsers(help="--", dest='subparser_name')
+    
+    # profile bins
+    profile_parser = subparsers.add_parser('profile',
+                                            formatter_class=CustomHelpFormatter,
+                                            description='Identify marker genes and calculate assembly statistics.',
+                                            add_help=False)
+
+    profile_parser.add_argument('output_dir', help="output directory")
+    
+    required_group = profile_parser.add_argument_group(title='required arguments (one of)')
+    bin_group = required_group.add_mutually_exclusive_group(required=True)
+    bin_group.add_argument('-b', '--bin_dirs', help="directories with bins from different binning methods", nargs='*')
+    bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
+    
+    optional_group = profile_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('-c', '--cpus', help="number of CPUs", type=int, default=1)
+    optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
+    optional_group.add_argument('-h', '--help', action="help", help="show help message")
+
+    # consensus bin selection
+    consensus_parser = subparsers.add_parser('consensus',
+                                            formatter_class=CustomHelpFormatter,
+                                            description="Consensus clustering across multiple binning methods.",
+                                            add_help=False)
+
+    consensus_parser.add_argument('profile_dir', help="directory with bin profiles (output of 'profile' command)")
+    consensus_parser.add_argument('output_dir', help="output directory")
+    
+    required_group = consensus_parser.add_argument_group(title='required arguments (one of)')
+    bin_group = required_group.add_mutually_exclusive_group(required=True)
+    bin_group.add_argument('-b', '--bin_dirs', help="directories with bins from different binning methods", nargs='*')
+    bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
+    
+    consensus_group = consensus_parser.add_argument_group(title="optional bin selection arguments")
+    consensus_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    consensus_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
+    consensus_group.add_argument('-r', '--remove_perc', help="minimum percentage of bins require to remove contig from highest quality bin", type=float, default=50.0)
+    consensus_group.add_argument('-a', '--add_perc', help="minimum percentage of matched bins required to add contig to highest quality bin", type=float, default=50.0)
+    consensus_group.add_argument('-m', '--add_matches', help="minimum number of matched bins required to 'add' contigs", type=int, default=3)
+    #consensus_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+
+    optional_group = consensus_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
+    optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
+    optional_group.add_argument('-h', '--help', action="help", help="show help message")
+    
+    # greedy bin selection
+    greedy_parser = subparsers.add_parser('greedy',
+                                            formatter_class=CustomHelpFormatter,
+                                            description='Greedy bin selection across multiple binning methods.',
+                                            add_help=False)
+
+    greedy_parser.add_argument('profile_dir', help="directory with bin profiles (output of 'profile' command)")
+    greedy_parser.add_argument('output_dir', help="output directory")
+    
+    required_group = greedy_parser.add_argument_group(title='required arguments (one of)')
+    bin_group = required_group.add_mutually_exclusive_group(required=True)
+    bin_group.add_argument('-b', '--bin_dirs', help="directories with bins from different binning methods", nargs='*')
+    bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
+    
+    greedy_group = greedy_parser.add_argument_group(title="optional bin selection arguments")
+    greedy_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    greedy_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
+    #greedy_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+
+    optional_group = greedy_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
+    optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
+    optional_group.add_argument('-h', '--help', action="help", help="show help message")
+    
+    # unanimous bin selection
+    unanimous_parser = subparsers.add_parser('unanimous',
+                                            formatter_class=CustomHelpFormatter,
+                                            description='Unanimous bin filtering across multiple binning methods.',
+                                            add_help=False)
+
+    unanimous_parser.add_argument('profile_dir', help="directory with bin profiles (output of 'profile' command)")
+    unanimous_parser.add_argument('output_dir', help="output directory")
+    
+    required_group = unanimous_parser.add_argument_group(title='required arguments (one of)')
+    bin_group = required_group.add_mutually_exclusive_group(required=True)
+    bin_group.add_argument('-b', '--bin_dirs', help="directories with bins from different binning methods", nargs='*')
+    bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
+    
+    unanimous_group = unanimous_parser.add_argument_group(title="optional bin selection arguments")
+    unanimous_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    unanimous_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
+    #unanimous_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+
+    optional_group = unanimous_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
+    optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
+    optional_group.add_argument('-h', '--help', action="help", help="show help message")
+
+    # compare two sets of bins (e.g., from alternative binning methods)
+    compare_parser = subparsers.add_parser('compare',
+                                               formatter_class=CustomHelpFormatter,
+                                               description='Compare bins from two binning methods.')
+    compare_parser.add_argument('assembly_file', help="assembled contigs used to generate bins")
+    compare_parser.add_argument('bin_dir1', help="directory containing bins from first method")
+    compare_parser.add_argument('bin_dir2', help="directory containing bins from second method")
+    compare_parser.add_argument('output_file', help="output file showing overlap between bins")
+
+    compare_parser.add_argument('-x', '--extension1', default='fna', help="extension of bins in directory 1")
+    compare_parser.add_argument('-y', '--extension2', default='fna', help="extension of bins in directory 2")
+    compare_parser.add_argument('--silent', help="suppress output of logger", action='store_true')
+    
+    # ensure sequences are unique
+    unique_parser = subparsers.add_parser('unique',
+                                            formatter_class=CustomHelpFormatter,
+                                            description='Ensure sequences are not assigned to multiple bins.')
+    unique_parser.add_argument('bin_dir', help="directory containing bins")
+    unique_parser.add_argument('-x', '--extension', default='fna', help="extension of bins (all other files in directory are ignored)")
+    unique_parser.add_argument('--silent', help="suppress output of logger", action='store_true')
+    
+    # get and check options
+    args = None
+    if(len(sys.argv) == 1 or sys.argv[1] == '-h' or sys.argv == '--help'):
+        print_help()
+        sys.exit(0)
+    else:
+        args = parser.parse_args()
+
+    try:
+        logger_setup(args.output_dir, "unitem.log", "UniteM", version(), args.silent)
+    except:
+        logger_setup(None, "unitem.log", "UniteM", version(), args.silent)
+
+    # do what we came here to do
+    try:
+        parser = OptionsParser()
+        if(False):
+            # import pstats
+            # p = pstats.Stats('prof')
+            # p.sort_stats('cumulative').print_stats(10)
+            # p.sort_stats('time').print_stats(10)
+            import cProfile
+            cProfile.run('parser.parse_options(args)', 'prof')
+        elif False:
+            import pdb
+            pdb.run(parser.parse_options(args))
+        else:
+            parser.parse_options(args)
+    except SystemExit:
+        print "\n  Controlled exit resulting from an unrecoverable error or warning."
+    except:
+        print "\nUnexpected error:", sys.exc_info()[0]
+        raise

@@ -1,0 +1,29 @@
+0.0.7
+- changed 'consensus' binning so a contig is only removed 
+  iff it appears in a consensus of non-matched bins, which
+  not includes the highest quality bin as a positive hit
+- percentage to remove a contig must also now be strictly
+  greater than the specified percentage
+- also made changes to the 'consensus' method for adding contigs
+- took out merging of bins since it was producing chimeric bins on the CAMI synthetic community
+- change default weighting for quality from 5 to 2
+
+0.0.6
+- fixed bug with 'greedy' method
+
+0.0.5
+- refined 'majority vote' method and renamed to 'consensus'
+- 'greedy' method now performed as special case of 'consensus' method to simplify code base
+- added option to merge partial bins
+
+0.0.4
+- initial implementation of greedy 'majority vote' method
+
+0.0.3
+- initial implementation of Markov 'majority vote' method
+
+0.0.2
+- initial implementation of greedy method
+
+0.0.1
+- initial release
