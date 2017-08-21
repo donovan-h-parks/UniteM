@@ -3,7 +3,7 @@
 [![version status](https://img.shields.io/pypi/v/unitem.svg)](https://pypi.python.org/pypi/unitem)
 [![downloads](https://img.shields.io/pypi/dm/unitem.svg)](https://pypi.python.org/pypi/unitem)
 
-UniteM is a software toolkit implementing different ensemble binning strategies which combine the output produced by multiple binning methods.
+UniteM is a software toolkit implementing different ensemble binning strategies for producing a non-redundant set of bins from the output of multiple binning methods.
 
 
 ## Installation
