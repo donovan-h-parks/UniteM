@@ -1,3 +1,6 @@
+0.0.17
+- improved Python 3 compatibility
+
 0.0.16
 - changes to support renamed executables in MetaBAT v2.12.1
 

@@ -40,9 +40,9 @@ from biolib.misc.custom_help_formatter import CustomHelpFormatter, ChangeTempAct
 def print_help():
     """Help menu."""
 
-    print ''
-    print '                ...::: UniteM v' + version() + ' :::...'''
-    print '''\
+    print('')
+    print('                ...::: UniteM v' + version() + ' :::...''')
+    print('''\
 
   Binning:
     bin -> Apply binning methods to an assembly
@@ -63,7 +63,7 @@ def print_help():
 
   Feature requests or bug reports can be sent to Donovan Parks (donovan.parks@gmail.com)
     or posted on GitHub (https://github.com/dparks1134/unitem).
-    '''
+    ''')
 
 if __name__ == '__main__':
 
