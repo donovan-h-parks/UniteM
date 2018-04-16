@@ -1,3 +1,6 @@
+0.0.18
+- added biolib as dependency
+
 0.0.17
 - improved Python 3 compatibility
 

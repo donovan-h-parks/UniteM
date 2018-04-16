@@ -36,5 +36,6 @@ if __name__ == '__main__':
           'Programming Language :: Python :: 2.7',
           'Topic :: Scientific/Engineering :: Bio-Informatics',
           ],
-        install_requires=["svgwrite>=1.1.9"],
+        install_requires=["biolib>=0.0.46",
+				"svgwrite>=1.1.9"],
     )
