@@ -15,6 +15,10 @@
 #                                                                             #
 ###############################################################################
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import sys
 import logging
@@ -87,28 +91,28 @@ class BinTools():
                     seq_id = line[1:].split(None, 1)[0]
 
                     if seq_id in seq_ids:
-                        print 'Sequence %s found multiple times in bin %s.' % (seq_id, bin_id)
+                        print('Sequence %s found multiple times in bin %s.' % (seq_id, bin_id))
                     seq_ids.add(seq_id)
 
             bin_seqs[bin_id] = seq_ids
 
         # check for sequences assigned to multiple bins
-        print ''
+        print()
         bDuplicates = False
         bin_ids = bin_seqs.keys()
-        for i in xrange(0, len(bin_ids)):
-            for j in xrange(i + 1, len(bin_ids)):
+        for i in range(0, len(bin_ids)):
+            for j in range(i + 1, len(bin_ids)):
                 seq_inter = set(bin_seqs[bin_ids[i]]).intersection(set(bin_seqs[bin_ids[j]]))
 
                 if len(seq_inter) > 0:
                     bDuplicates = True
-                    print 'Sequences shared between %s and %s: ' % (bin_ids[i], bin_ids[j])
+                    print('Sequences shared between %s and %s: ' % (bin_ids[i], bin_ids[j]))
                     for seq_id in seq_inter:
-                        print '  ' + seq_id
-                    print ''
+                        print('  ' + seq_id)
+                    print()
 
         if not bDuplicates:
-            print 'No sequences assigned to multiple bins.'
+            print('No sequences assigned to multiple bins.')
             
     def _binning_stats(self, bins, seq_lens):
         """Calculate binning stats for a set of bins."""
@@ -119,7 +123,7 @@ class BinTools():
         bin_stats = {}
         processed_seqs = set()
         repeats = set()
-        for binId, seqs in bins.iteritems():
+        for bin_id, seqs in bins.items():
             num_binned_bases = 0
             for seq_id in seqs:
                 num_binned_bases += seq_lens[seq_id]
@@ -130,7 +134,7 @@ class BinTools():
                 else:
                     repeats.add(seq_id)
 
-            bin_stats[binId] = [len(seqs), num_binned_bases]
+            bin_stats[bin_id] = [len(seqs), num_binned_bases]
 
         return bin_stats, total_uniq_binned_seqs, tota_uniq_binned_bases, len(repeats)
             
@@ -147,7 +151,7 @@ class BinTools():
         total_bases1K = 0
         num_seq5K = 0
         total_bases5K = 0
-        for seq_id, seq in seqs.iteritems():
+        for seq_id, seq in seqs.items():
             seq_len = len(seq)
             seq_lens[seq_id] = seq_len
             total_bases += seq_len
@@ -167,31 +171,31 @@ class BinTools():
         bin_stats2, total_uniq_binned_seqs2, tota_uniq_binned_bases2, num_repeats2 = self._binning_stats(bins2, seq_lens)
 
         # sort bins by size
-        bin_stats1 = sorted(bin_stats1.iteritems(), key=lambda x: x[1][1], reverse=True)
-        bin_stats2 = sorted(bin_stats2.iteritems(), key=lambda x: x[1][1], reverse=True)
+        bin_stats1 = sorted(bin_stats1.items(), key=lambda x: x[1][1], reverse=True)
+        bin_stats2 = sorted(bin_stats2.items(), key=lambda x: x[1][1], reverse=True)
 
         # report summary results
-        print ''
-        print 'Assembled sequences = %d (%.2f Mbp)' % (len(seqs), float(total_bases) / 1e6)
-        print '  No. seqs > 1 kbp = %d (%.2f Mbp)' % (num_seq1K, float(total_bases1K) / 1e6)
-        print '  No. seqs > 5 kbp = %d (%.2f Mbp)' % (num_seq5K, float(total_bases5K) / 1e6)
-        print ''
-        print 'Binning statistics:'
-        print ('  1) No. bins: %s, No. binned seqs: %d (%.2f%%), No. binned bases: %.2f Mbp (%.2f%%), No. seqs in multiple bins: %d'
+        print()
+        print('Assembled sequences = %d (%.2f Mbp)' % (len(seqs), total_bases / 1e6))
+        print('  No. seqs > 1 kbp = %d (%.2f Mbp)' % (num_seq1K, total_bases1K / 1e6))
+        print('  No. seqs > 5 kbp = %d (%.2f Mbp)' % (num_seq5K, total_bases5K / 1e6))
+        print()
+        print('Binning statistics:')
+        print('  1) No. bins: %s, No. binned seqs: %d (%.2f%%), No. binned bases: %.2f Mbp (%.2f%%), No. seqs in multiple bins: %d'
                                 % (len(bins1),
                                    total_uniq_binned_seqs1,
-                                   float(total_uniq_binned_seqs1) * 100 / len(seqs),
-                                   float(tota_uniq_binned_bases1) / 1e6,
-                                   float(tota_uniq_binned_bases1) * 100 / total_bases,
+                                   total_uniq_binned_seqs1 * 100 / len(seqs),
+                                   tota_uniq_binned_bases1 / 1e6,
+                                   tota_uniq_binned_bases1 * 100 / total_bases,
                                    num_repeats1))
-        print ('  2) No. bins: %s, No. binned seqs: %d (%.2f%%), No. binned bases: %.2f Mbp (%.2f%%), No. seqs in multiple bins: %d'
+        print('  2) No. bins: %s, No. binned seqs: %d (%.2f%%), No. binned bases: %.2f Mbp (%.2f%%), No. seqs in multiple bins: %d'
                                 % (len(bins2),
                                    total_uniq_binned_seqs2,
-                                   float(total_uniq_binned_seqs2) * 100 / len(seqs),
-                                   float(tota_uniq_binned_bases2) / 1e6,
-                                   float(tota_uniq_binned_bases2) * 100 / total_bases,
+                                   total_uniq_binned_seqs2 * 100 / len(seqs),
+                                   tota_uniq_binned_bases2 / 1e6,
+                                   tota_uniq_binned_bases2 * 100 / total_bases,
                                    num_repeats2))
-        print ''
+        print()
 
         # output report
         fout = open(output_file, 'w')
@@ -240,10 +244,10 @@ class BinTools():
                 binned_seqs2[bin_id2].update(seqs_in_common)
             fout.write('\t%d\t%d\t%.2f\t%s\t%.2f\t%.2f\n' % (len(seqs1) - len(binned_seqs),
                                                              data1[1][0],
-                                                             float(data1[1][1]) / 1e6,
+                                                             data1[1][1] / 1e6,
                                                              best_matching_bin,
-                                                             float(max_bases_in_common) * 100 / data1[1][1],
-                                                             float(max_seqs_in_common) * 100 / data1[1][0],
+                                                             max_bases_in_common * 100 / data1[1][1],
+                                                             max_seqs_in_common * 100 / data1[1][0],
                                                              ))
 
         fout.write('Unbinned')
@@ -259,7 +263,7 @@ class BinTools():
 
         fout.write('No. Bases (Mbp)')
         for data in bin_stats2:
-            fout.write('\t%.2f' % (float(data[1][1]) / 1e6))
+            fout.write('\t%.2f' % (data[1][1] / 1e6))
         fout.write('\n')
 
         fout.write('Best Match')
@@ -271,13 +275,13 @@ class BinTools():
         fout.write('Bases in Common (%)')
         for data in bin_stats2:
             binId = data[0]
-            fout.write('\t%.2f' % (float(max_bases_in_common2[binId]) * 100 / data[1][1]))
+            fout.write('\t%.2f' % (max_bases_in_common2[binId] * 100 / data[1][1]))
         fout.write('\n')
 
         fout.write('Sequences in Common (%)')
         for data in bin_stats2:
             binId = data[0]
-            fout.write('\t%.2f' % (float(max_seqs_in_common2[binId]) * 100 / data[1][0]))
+            fout.write('\t%.2f' % (max_seqs_in_common2[binId] * 100 / data[1][0]))
         fout.write('\n')
 
         fout.close()

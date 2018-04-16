@@ -15,6 +15,10 @@
 #                                                                             #
 ###############################################################################
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import logging
 from collections import defaultdict
@@ -157,10 +161,10 @@ class Markers():
         self.bac_markers_on_contigs = defaultdict(list)
         self.ar_markers_on_contigs = defaultdict(list)
         processed_contigs = set()
-        for binning_method, (bac_gene_tables, ar_gene_tables) in gene_tables.iteritems():
+        for binning_method, (bac_gene_tables, ar_gene_tables) in gene_tables.items():
             scaffolds_in_binning_method = set()
             for bin_id in bac_gene_tables:
-                for marker_id, scaffold_ids in bac_gene_tables[bin_id].iteritems():
+                for marker_id, scaffold_ids in bac_gene_tables[bin_id].items():
                     for scaffold_id in scaffold_ids:
                         if scaffold_id in processed_contigs:
                             continue
@@ -169,7 +173,7 @@ class Markers():
                     scaffolds_in_binning_method.update(scaffold_ids)
                             
             for bin_id in ar_gene_tables:
-                for marker_id, scaffold_ids in ar_gene_tables[bin_id].iteritems():
+                for marker_id, scaffold_ids in ar_gene_tables[bin_id].items():
                     for scaffold_id in scaffold_ids:
                         if scaffold_id in processed_contigs:
                             continue

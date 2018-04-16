@@ -15,6 +15,10 @@
 #                                                                             #
 ###############################################################################
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
 import ast
 from collections import defaultdict
@@ -32,7 +36,7 @@ def calculateN50L50M50(seqs):
     
     seq_lens = [len(seq) for seq in seqs]
 
-    thresholdN50 = sum(seq_lens) / 2.0
+    thresholdN50 = sum(seq_lens) / 2
 
     seq_lens.sort(reverse=True)
 
@@ -81,7 +85,8 @@ def read_bins(bin_dirs):
     
     bins = defaultdict(lambda: defaultdict(set))
     contigs = {}
-    for method_id, (bin_dir, bin_ext) in bin_dirs.iteritems():
+    contigs_in_bins = defaultdict(lambda: {})
+    for method_id, (bin_dir, bin_ext) in bin_dirs.items():
         for bf in os.listdir(bin_dir):
             if not bf.endswith(bin_ext):
                 continue
@@ -94,11 +99,12 @@ def read_bins(bin_dirs):
             for seq_id, seq in seq_io.read_seq(bf_path):
                 bins[method_id][bin_id].add(seq_id)
                 contigs[seq_id] = seq
+                contigs_in_bins[seq_id][method_id] = bin_id
                 
             if len(bins[method_id][bin_id]) == 0:
                 self.logger.warning('Bin %s from %s is empty.' % (bf, method_id))
             
-    return bins, contigs
+    return bins, contigs, contigs_in_bins
     
 def bin_gc(bin):
     """Calculate GC-content of bin."""
@@ -116,5 +122,5 @@ def bin_gc(bin):
         t_count += t
         
     total = (a_count + c_count + g_count + t_count)
-    return float(g_count + c_count) / total
+    return (g_count + c_count) / total
         

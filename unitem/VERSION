@@ -1,3 +1,34 @@
+0.0.16
+- changes to support renamed executables in MetaBAT v2.12.1
+
+0.0.15
+- changed interface to 'bin' command to make it clear either BAM files or a coverage file must be provided
+
+0.0.14
+- fixed bug with different MetaBAT presets all being written to the same directory
+- moved to updated version of GroopM v2 that can accepted a 'jgi_summarize_bam_contig_depths' formatted coverage file
+- changes percent base pairs in common calculation from (shared/bin1) to (shared/max(bin1, bin2))
+- added in table and plots showing base pairs in common between UniteM bins and those from specific binning methods
+
+0.0.13
+- fixed bug with directories containing few bins being processed incorrectly
+
+0.0.12
+- fixed bug with code to call GroopM v2
+
+0.0.11
+- better error handling of binning methods that fail to run to completion
+
+0.0.10
+- better error handling for directories missing any valid bins
+
+0.0.9
+- added the 'bin' command
+
+0.0.8
+- simplified reporting by having a single parameter for setting 
+  the weight used for calculating quality
+
 0.0.7
 - changed 'consensus' binning so a contig is only removed 
   iff it appears in a consensus of non-matched bins, which

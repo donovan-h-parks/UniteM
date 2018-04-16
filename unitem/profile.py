@@ -15,7 +15,12 @@
 #                                                                             #
 ###############################################################################
 
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import os
+import sys
 import logging
 from collections import defaultdict
 
@@ -38,7 +43,7 @@ class Profile():
         
     def _genome_quality(self, bac_quality_table, ar_quality_table):
         """Get CheckM estimates for each genome."""
-        
+
         bac = {}
         with open(bac_quality_table) as f:
             f.readline()
@@ -91,7 +96,7 @@ class Profile():
             total_comp = 0
             total_cont = 0
             total_q = 0
-            for bid, (domain, comp, cont) in genome_quality[bm].iteritems():
+            for bid, (domain, comp, cont) in genome_quality[bm].items():
                 quality = comp - 5*cont
                 
                 for test_comp in [90, 80, 70]:
@@ -157,7 +162,7 @@ class Profile():
         
         num_processed = 0
         genome_quality = defaultdict(lambda: dict)
-        for method_id, (bin_dir, bin_ext) in bin_dirs.iteritems():
+        for method_id, (bin_dir, bin_ext) in bin_dirs.items():
             num_processed += 1
             self.logger.info('Profiling %s (%d of %d).' % (method_id, num_processed, len(bin_dirs)))
             
@@ -183,16 +188,23 @@ class Profile():
                                                                         ms_file, 
                                                                         cur_output_dir)
                 os.system(cmd)
-            
-            genome_quality[method_id] = self._genome_quality(os.path.join(output_dir, 
-                                                                            BINNING_METHOD_DIR, 
-                                                                            method_id, 
-                                                                            CHECKM_BAC_DIR, 
-                                                                            GENOME_QUALITY_TABLE),
-                                                                os.path.join(output_dir, 
-                                                                                BINNING_METHOD_DIR, 
-                                                                                method_id, 
-                                                                                CHECKM_AR_DIR, 
-                                                                                GENOME_QUALITY_TABLE))
+                
+            bac_quality_table = os.path.join(output_dir, 
+                                                BINNING_METHOD_DIR, 
+                                                method_id, 
+                                                CHECKM_BAC_DIR, 
+                                                GENOME_QUALITY_TABLE)
+            ar_quality_table = os.path.join(output_dir, 
+                                                BINNING_METHOD_DIR, 
+                                                method_id, 
+                                                CHECKM_AR_DIR, 
+                                                GENOME_QUALITY_TABLE)
+            if not os.path.exists(bac_quality_table) or not os.path.exists(ar_quality_table):
+                self.logger.error('Missing quality table for %s.' % method_id)
+                self.logger.error('Please verify there were bins in the bin directory specified for this method.')
+                sys.exit()
+
+            genome_quality[method_id] = self._genome_quality(bac_quality_table,
+                                                                ar_quality_table)
 
         self._report_genome_quality(genome_quality, output_dir)

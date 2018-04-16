@@ -8,7 +8,7 @@ import os
 def version():
     setupDir = os.path.dirname(os.path.realpath(__file__))
     versionFile = open(os.path.join(setupDir, 'unitem', 'VERSION'))
-    return versionFile.read().strip()
+    return versionFile.readline().strip()
 
 if __name__ == '__main__':
 
@@ -21,13 +21,21 @@ if __name__ == '__main__':
         version=version(),
         author='Donovan Parks',
         author_email='donovan.parks@gmail.com',
+        maintainer='Donovan Parks',
+        maintainer_email='donovan.parks@gmail.com',
         packages=['unitem'],
         scripts=['bin/unitem'],
-        package_data={'unitem' : ['VERSION', './checkm_ms/*.ms']},
+        package_data={'unitem' : ['VERSION','./distributions/*.txt', './checkm_ms/*.ms']},
         url='http://pypi.python.org/pypi/unitem/',
-        license='GPL3',
-        description='Combines bins produced by independent binning methods.',
-        install_requires=[
-            "numpy>=1.9.0",
-            "biolib>=0.0.19"],
+        license='GPLv3',
+        description='Ensemble binning strategies for combining the output of multiple binning methods.',
+        classifiers=[
+          'Development Status :: 4 - Beta',
+          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+          'Natural Language :: English',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Topic :: Scientific/Engineering :: Bio-Informatics',
+          ],
+        install_requires=["svgwrite>=1.1.9"],
     )

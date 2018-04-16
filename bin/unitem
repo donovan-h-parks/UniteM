@@ -44,6 +44,9 @@ def print_help():
     print '                ...::: UniteM v' + version() + ' :::...'''
     print '''\
 
+  Binning:
+    bin -> Apply binning methods to an assembly
+  
   Profiling:
     profile -> Identify marker genes and calculate assembly statistics
    
@@ -67,6 +70,38 @@ if __name__ == '__main__':
     # initialize the options parser
     parser = argparse.ArgumentParser(add_help=False)
     subparsers = parser.add_subparsers(help="--", dest='subparser_name')
+    
+    # bin
+    bin_parser = subparsers.add_parser('bin',
+                                            formatter_class=CustomHelpFormatter,
+                                            description='Apply binning methods to an assembly.',
+                                            add_help=False)
+
+    bin_parser.add_argument('assembly_file', help="assembled contigs to bin (FASTA format)")
+    bin_parser.add_argument('output_dir', help="output directory")
+    
+    required_group = bin_parser.add_argument_group(title='required arguments (one of)')
+    cov_group = required_group.add_mutually_exclusive_group(required=True)
+    cov_group.add_argument('--bam_files', nargs='*', help="BAM file(s) to parse for coverage profile")
+    cov_group.add_argument('--cov_file', help="file indicating coverage information")
+    
+    binning_group = bin_parser.add_argument_group(title='binning methods')
+    binning_group.add_argument('--bs', help="run BinSanity", action='store_true')
+    binning_group.add_argument('--gm2', help="run GroopM v2", action='store_true')
+    binning_group.add_argument('--max40', help="run MaxBin with the 40 marker gene set", action='store_true')
+    binning_group.add_argument('--max107', help="run MaxBin with the 107 marker gene set", action='store_true')
+    binning_group.add_argument('--mb2', help="run MetaBAT v2", action='store_true')
+    binning_group.add_argument('--mb_verysensitive', help="run MetaBAT v1 with the 'verysensitive' preset settings", action='store_true')
+    binning_group.add_argument('--mb_sensitive', help="run MetaBAT v1 with the 'sensitive' preset settings", action='store_true')
+    binning_group.add_argument('--mb_specific', help="run MetaBAT v1 with the 'specific' preset settings", action='store_true')
+    binning_group.add_argument('--mb_veryspecific', help="run MetaBAT v1 with the 'veryspecific' preset settings", action='store_true')
+    binning_group.add_argument('--mb_superspecific', help="run MetaBAT v1 with the 'superspecific' preset settings", action='store_true')
+
+    optional_group = bin_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('-m', '--min_contig_len', help="minimum length of contigs to bin (>=1500 recommended)", type=int, default=2500)
+    optional_group.add_argument('-c', '--cpus', help="number of CPUs", type=int, default=1)
+    optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
+    optional_group.add_argument('-h', '--help', action="help", help="show help message")
     
     # profile bins
     profile_parser = subparsers.add_parser('profile',
@@ -101,16 +136,19 @@ if __name__ == '__main__':
     bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
     
     consensus_group = consensus_parser.add_argument_group(title="optional bin selection arguments")
-    consensus_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    consensus_group.add_argument('-w', '--weight', help="weight given to contamination for assessing genome quality", type=float, default=2)
     consensus_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
-    consensus_group.add_argument('-r', '--remove_perc', help="minimum percentage of bins require to remove contig from highest quality bin", type=float, default=50.0)
-    consensus_group.add_argument('-a', '--add_perc', help="minimum percentage of matched bins required to add contig to highest quality bin", type=float, default=50.0)
+    consensus_group.add_argument('-x', '--sel_min_comp', help="minimum completeness of bin to consider during bin selection process", type=float, default=50)
+    consensus_group.add_argument('-y', '--sel_max_cont', help="maximum contamination of bin to consider during bin selection process", type=float, default=10)
+    consensus_group.add_argument('-r', '--remove_perc', help="minimum percentage of bins required to remove contigs from highest-quality bin", type=float, default=50.0)
+    consensus_group.add_argument('-a', '--add_perc', help="minimum percentage of matched bins required to add contigs to highest-quality bin", type=float, default=50.0)
     consensus_group.add_argument('-m', '--add_matches', help="minimum number of matched bins required to 'add' contigs", type=int, default=3)
-    #consensus_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+    #consensus_group.add_argument('--merge', help="attempt to merge partial bins (requires coverage file)", action='store_true')
 
     optional_group = consensus_parser.add_argument_group(title='optional arguments')
-    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    #optional_group.add_argument('--cov_file', help="file indicating coverage information")
     optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
     optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
     optional_group.add_argument('-h', '--help', action="help", help="show help message")
@@ -130,13 +168,16 @@ if __name__ == '__main__':
     bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
     
     greedy_group = greedy_parser.add_argument_group(title="optional bin selection arguments")
-    greedy_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    greedy_group.add_argument('-w', '--weight', help="weight given to contamination for assessing genome qualitys", type=float, default=2)
     greedy_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
-    #greedy_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+    greedy_group.add_argument('-x', '--sel_min_comp', help="minimum completeness of bin to consider during bin selection process", type=float, default=50)
+    greedy_group.add_argument('-y', '--sel_max_cont', help="maximum contamination of bin to consider during bin selection process", type=float, default=10)
+    #greedy_group.add_argument('--merge', help="attempt to merge partial bins (requires coverage file)", action='store_true')
 
     optional_group = greedy_parser.add_argument_group(title='optional arguments')
-    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    #optional_group.add_argument('--cov_file', help="file indicating coverage information")
     optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
     optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
     optional_group.add_argument('-h', '--help', action="help", help="show help message")
@@ -156,13 +197,16 @@ if __name__ == '__main__':
     bin_group.add_argument('-f', '--bin_file', help="tab-separated file indicating directories with bins from binning methods (two columns: method name and directory)")
     
     unanimous_group = unanimous_parser.add_argument_group(title="optional bin selection arguments")
-    unanimous_group.add_argument('-w', '--sel_weight', help="weight given to contamination for assessing genome quality during bin selection process", type=float, default=2)
+    unanimous_group.add_argument('-w', '--weight', help="weight given to contamination for assessing genome quality", type=float, default=2)
     unanimous_group.add_argument('-q', '--sel_min_quality', help="minimum quality of bin to consider during bin selection process", type=float, default=50)
-    #unanimous_group.add_argument('-n', '--no_merge', help="do not attempt to merge partial bins", action='store_true')
+    unanimous_group.add_argument('-x', '--sel_min_comp', help="minimum completeness of bin to consider during bin selection process", type=float, default=50)
+    unanimous_group.add_argument('-y', '--sel_max_cont', help="maximum contamination of bin to consider during bin selection process", type=float, default=10)
+    #unanimous_group.add_argument('--merge', help="attempt to merge partial bins (requires coverage file)", action='store_true')
 
     optional_group = unanimous_parser.add_argument_group(title='optional arguments')
-    optional_group.add_argument('--report_weight', help="weight given to contamination for assessing genome quality when reporting bins", type=float, default=1)
+    #optional_group.add_argument('--cov_file', help="file indicating coverage information")
     optional_group.add_argument('--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
+    optional_group.add_argument('--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
     optional_group.add_argument('-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument('--silent', help="suppress output of logger", action='store_true')
     optional_group.add_argument('-h', '--help', action="help", help="show help message")
@@ -217,7 +261,7 @@ if __name__ == '__main__':
         else:
             parser.parse_options(args)
     except SystemExit:
-        print "\n  Controlled exit resulting from an unrecoverable error or warning."
+        print("\nControlled exit resulting from an unrecoverable error or warning.")
     except:
-        print "\nUnexpected error:", sys.exc_info()[0]
+        print("\nUnexpected error:", sys.exc_info()[0])
         raise
