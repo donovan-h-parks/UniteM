@@ -24,7 +24,7 @@ Usage information about specific functions can also be accessed through the help
 > unitem bin –h
 ```
 
-Detailed information regarding the use of CompareM can be found in the User's Guide (user_guide.pdf).
+Detailed information regarding the use of UniteM can be found in the User's Guide (unitem_manual.pdf).
 
 
 ## Cite
