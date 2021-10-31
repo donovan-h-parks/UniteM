@@ -15,18 +15,14 @@
 #                                                                             #
 ###############################################################################
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 import sys
 import logging
 from collections import defaultdict
 
-from biolib.external.execute import check_on_path
-
 from unitem.defaults import *
+from unitem.utils import check_on_path
+from unitem.common import run_cmd
 
 
 class Profile():
@@ -34,13 +30,13 @@ class Profile():
 
     def __init__(self, cpus):
         """Initialization."""
-        
+
         self.logger = logging.getLogger('timestamp')
-        
+
         check_on_path('checkm')
-        
+
         self.cpus = cpus
-        
+
     def _genome_quality(self, bac_quality_table, ar_quality_table):
         """Get CheckM estimates for each genome."""
 
@@ -53,7 +49,7 @@ class Profile():
                 comp = float(line_split[5])
                 cont = float(line_split[6])
                 bac[gid] = (comp, cont)
-                
+
         ar = {}
         with open(ar_quality_table) as f:
             f.readline()
@@ -63,7 +59,7 @@ class Profile():
                 comp = float(line_split[5])
                 cont = float(line_split[6])
                 ar[gid] = (comp, cont)
-        
+
         gq = {}
         for gid in set(bac.keys()).union(ar):
             bac_comp, bac_cont = bac[gid]
@@ -72,22 +68,24 @@ class Profile():
                 gq[gid] = ('Bacteria', bac_comp, bac_cont)
             else:
                 gq[gid] = ('Archaea', ar_comp, ar_cont)
-                
+
         return gq
-        
+
     def _report_genome_quality(self, genome_quality, output_dir):
         """Summarize quality of genomes."""
-        
+
         # create table for each binning method
         for bm in genome_quality:
             table = os.path.join(output_dir, bm + '_quality.tsv')
             fout = open(table, 'w')
-            fout.write('Genome ID\tMarker Set Domain\tCompleteness (%)\tContamination (%)\tQuality\n')
+            fout.write(
+                'Genome ID\tMarker Set Domain\tCompleteness (%)\tContamination (%)\tQuality\n')
             for gid in genome_quality[bm]:
                 domain, comp, cont = genome_quality[bm][gid]
-                fout.write('%s\t%s\t%.2f\t%.2f\t%.2f\n' % (gid, domain, comp, cont, comp-5*cont))
+                fout.write('%s\t%s\t%.2f\t%.2f\t%.2f\n' %
+                           (gid, domain, comp, cont, comp-5*cont))
             fout.close()
-            
+
         # report global results file
         summary = {}
         for bm in genome_quality:
@@ -98,7 +96,7 @@ class Profile():
             total_q = 0
             for bid, (domain, comp, cont) in genome_quality[bm].items():
                 quality = comp - 5*cont
-                
+
                 for test_comp in [90, 80, 70]:
                     for test_cont in [5, 10]:
                         if comp >= test_comp and cont <= test_cont:
@@ -107,16 +105,17 @@ class Profile():
                 for test_q in [90, 70, 50]:
                     if quality >= test_q:
                         quality_count[test_q] += 1
-                            
+
                 total_comp += comp
                 total_cont += cont
                 total_q += quality
-                
-                summary[bm] = (comp_cont_count, quality_count, total_comp, total_cont, total_q)
-        
+
+                summary[bm] = (comp_cont_count, quality_count,
+                               total_comp, total_cont, total_q)
+
         fout = open(os.path.join(output_dir, 'bin_quality_summary.tsv'), 'w')
         fout.write('\t' + '\t'.join(sorted(summary)) + '\n')
-        
+
         for comp in [90, 80, 70]:
             for cont in [5, 10]:
                 fout.write('Comp. >= %d, cont. <= %d' % (comp, cont))
@@ -129,17 +128,17 @@ class Profile():
             for bm in sorted(summary):
                 fout.write('\t%d' % summary[bm][1][q])
             fout.write('\n')
-            
+
         fout.write('Total compl.')
         for bm in sorted(summary):
             fout.write('\t%.1f' % summary[bm][2])
         fout.write('\n')
-            
+
         fout.write('Total cont.')
         for bm in sorted(summary):
             fout.write('\t%.1f' % summary[bm][3])
         fout.write('\n')
-        
+
         fout.write('Total quality')
         for bm in sorted(summary):
             fout.write('\t%.1f' % summary[bm][4])
@@ -158,53 +157,61 @@ class Profile():
             Output directory.
         """
 
-        self.logger.info('Profiling genomes in %d directories.' % len(bin_dirs))
-        
+        self.logger.info(f'Profiling genomes in {len(bin_dirs)} directories.')
+
         num_processed = 0
         genome_quality = defaultdict(lambda: dict)
         for method_id, (bin_dir, bin_ext) in bin_dirs.items():
             num_processed += 1
-            self.logger.info('Profiling %s (%d of %d).' % (method_id, num_processed, len(bin_dirs)))
-            
+            self.logger.info('Profiling {} ({} of {}).'.format(
+                method_id,
+                num_processed,
+                len(bin_dirs)))
+
             for d, ms_file in [(CHECKM_BAC_DIR, CHECKM_BAC_MS), (CHECKM_AR_DIR, CHECKM_AR_MS)]:
-                cur_output_dir = os.path.join(output_dir, BINNING_METHOD_DIR, method_id, d)
-                cmd = 'checkm analyze -t %d -x %s %s %s %s' % (self.cpus, 
-                                                                bin_ext, 
-                                                                ms_file, 
-                                                                bin_dir, 
-                                                                cur_output_dir)
-                os.system(cmd)
-                
-                marker_gene_table = os.path.join(cur_output_dir, MARKER_GENE_TABLE)
-                cmd = 'checkm qa -t %d -o 5 --tab_table -f %s %s %s' % (self.cpus,
-                                                                        marker_gene_table, 
-                                                                        ms_file, 
-                                                                        cur_output_dir)
-                os.system(cmd)
-                
-                genome_quality_table = os.path.join(cur_output_dir, GENOME_QUALITY_TABLE)
-                cmd = 'checkm qa -t %d -o 2 --tab_table -f %s %s %s' % (self.cpus,
-                                                                        genome_quality_table, 
-                                                                        ms_file, 
-                                                                        cur_output_dir)
-                os.system(cmd)
-                
-            bac_quality_table = os.path.join(output_dir, 
-                                                BINNING_METHOD_DIR, 
-                                                method_id, 
-                                                CHECKM_BAC_DIR, 
-                                                GENOME_QUALITY_TABLE)
-            ar_quality_table = os.path.join(output_dir, 
-                                                BINNING_METHOD_DIR, 
-                                                method_id, 
-                                                CHECKM_AR_DIR, 
-                                                GENOME_QUALITY_TABLE)
+                cur_output_dir = os.path.join(
+                    output_dir, BINNING_METHOD_DIR, method_id, d)
+                cmd = 'checkm analyze -t {} -x {} {} {} {}'.format(self.cpus,
+                                                                   bin_ext,
+                                                                   ms_file,
+                                                                   bin_dir,
+                                                                   cur_output_dir)
+                run_cmd(cmd, program='CheckM')
+
+                marker_gene_table = os.path.join(
+                    cur_output_dir, MARKER_GENE_TABLE)
+                cmd = 'checkm qa -t {} -o 5 --tab_table -f {} {} {}'.format(self.cpus,
+                                                                            marker_gene_table,
+                                                                            ms_file,
+                                                                            cur_output_dir)
+                run_cmd(cmd, program='CheckM')
+
+                genome_quality_table = os.path.join(
+                    cur_output_dir, GENOME_QUALITY_TABLE)
+                cmd = 'checkm qa -t {} -o 2 --tab_table -f {} {} {}'.format(self.cpus,
+                                                                            genome_quality_table,
+                                                                            ms_file,
+                                                                            cur_output_dir)
+                run_cmd(cmd, program='CheckM')
+
+            bac_quality_table = os.path.join(output_dir,
+                                             BINNING_METHOD_DIR,
+                                             method_id,
+                                             CHECKM_BAC_DIR,
+                                             GENOME_QUALITY_TABLE)
+            ar_quality_table = os.path.join(output_dir,
+                                            BINNING_METHOD_DIR,
+                                            method_id,
+                                            CHECKM_AR_DIR,
+                                            GENOME_QUALITY_TABLE)
+
             if not os.path.exists(bac_quality_table) or not os.path.exists(ar_quality_table):
-                self.logger.error('Missing quality table for %s.' % method_id)
-                self.logger.error('Please verify there were bins in the bin directory specified for this method.')
-                sys.exit()
+                self.logger.error(f'Missing quality table for {method_id}.')
+                self.logger.error(
+                    'Please verify there were bins in the bin directory.')
+                sys.exit(1)
 
             genome_quality[method_id] = self._genome_quality(bac_quality_table,
-                                                                ar_quality_table)
+                                                             ar_quality_table)
 
         self._report_genome_quality(genome_quality, output_dir)

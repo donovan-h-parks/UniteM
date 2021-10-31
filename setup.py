@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from setuptools import setup
 
@@ -6,9 +6,10 @@ import os
 
 
 def version():
-    setupDir = os.path.dirname(os.path.realpath(__file__))
-    versionFile = open(os.path.join(setupDir, 'unitem', 'VERSION'))
-    return versionFile.readline().strip()
+    setup_dir = os.path.dirname(os.path.realpath(__file__))
+    version_file = open(os.path.join(setup_dir, 'unitem', 'VERSION'))
+    return version_file.readline().strip()
+
 
 if __name__ == '__main__':
 
@@ -25,17 +26,18 @@ if __name__ == '__main__':
         maintainer_email='donovan.parks@gmail.com',
         packages=['unitem'],
         scripts=['bin/unitem'],
-        package_data={'unitem' : ['VERSION','./distributions/*.txt', './checkm_ms/*.ms']},
+        package_data={'unitem': ['VERSION',
+                                 './distributions/*.txt',
+                                 './checkm_ms/*.ms']},
         url='http://pypi.python.org/pypi/unitem/',
         license='GPLv3',
         description='Ensemble binning strategies for combining the output of multiple binning methods.',
         classifiers=[
-          'Development Status :: 4 - Beta',
-          'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-          'Natural Language :: English',
-          'Programming Language :: Python :: 2.7',
-          'Topic :: Scientific/Engineering :: Bio-Informatics',
-          ],
-        install_requires=["biolib>=0.0.46",
-				"svgwrite>=1.1.9"],
+            'Development Status :: 4 - Beta',
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'Natural Language :: English',
+            'Programming Language :: Python :: 2.7',
+            'Topic :: Scientific/Engineering :: Bio-Informatics',
+        ],
+        install_requires=["svgwrite>=1.1.9"],
     )

@@ -15,13 +15,11 @@
 #                                                                             #
 ###############################################################################
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import os
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
+
+BIN_STATS_EXT_OUT = 'bin_stats_ext.tsv'
 
 CHECKM_BAC_MS = os.path.join(file_dir, 'checkm_ms', 'bacteria.ms')
 CHECKM_AR_MS = os.path.join(file_dir, 'checkm_ms', 'archaea.ms')

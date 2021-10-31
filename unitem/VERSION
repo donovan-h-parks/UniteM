@@ -1,3 +1,14 @@
+0.1.0
+- full migration to Python 3
+- improved running of external programs
+- more robust parsing of coverage files to work with CoverM
+- removed CheckM Python module as a dependency; CheckM program is still a 3rd party dependency
+- removed biolib Python module as a dependency
+- pep8 formatting
+- removed support for BinSanity
+- program failure returns code 1
+- improved logging, including logging output of external programs
+
 0.0.18
 - added biolib as dependency
 
