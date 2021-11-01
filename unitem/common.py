@@ -39,14 +39,19 @@ def run_cmd(cmd, program=None):
                                 stderr=subprocess.STDOUT,
                                 encoding='utf-8')
 
-        progress_strs = ['  Finished processing',
-                         '  Finished parsing']
+        progress_strs = ['Finished processing',
+                         'Finished parsing']
         while True:
             out = proc.stdout.readline()
             if not out and proc.poll() is not None:
                 break
 
             if out.rstrip():
+                # HACK: if output is logging information for a dependency, remove
+                # the logging information so it isn't shown twice
+                if ' INFO: ' in out:
+                    out = out.split(' INFO: ')[1]
+
                 if any([p in out for p in progress_strs]):
                     # HACK: CheckM progress bars so write to stdout without newline
                     print(f'{out.rstrip()}\r', end='')
