@@ -47,8 +47,8 @@ def print_help():
     profile -> Identify marker genes and calculate assembly statistics
    
   Bin selection:
-    consensus -> Consensus clustering across multiple binning methods
     greedy    -> Greedy bin selection across multiple binning methods
+    consensus -> Consensus clustering across multiple binning methods
     unanimous -> Unanimous bin filtering across multiple binning methods
 
   Use: unitem <command> -h for command specific help.
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     optional_group.add_argument(
         '--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
     optional_group.add_argument(
-        '--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
+        '--simple_headers', help="do not add additional information to FASTA headers", action='store_true')
     optional_group.add_argument(
         '-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument(
@@ -222,7 +222,7 @@ if __name__ == '__main__':
     optional_group.add_argument(
         '--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
     optional_group.add_argument(
-        '--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
+        '--simple_headers', help="do not add additional information to FASTA headers", action='store_true')
     optional_group.add_argument(
         '-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument(
@@ -265,7 +265,7 @@ if __name__ == '__main__':
     optional_group.add_argument(
         '--report_min_quality', help="minimum quality of bin to report", type=float, default=10)
     optional_group.add_argument(
-        '--simple_headers', help="do not added additional information to FASTA headers", action='store_true')
+        '--simple_headers', help="do not add additional information to FASTA headers", action='store_true')
     optional_group.add_argument(
         '-p', '--bin_prefix', help="prefix for output bins", default='bin')
     optional_group.add_argument(
