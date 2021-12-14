@@ -30,13 +30,13 @@ from unitem.external.pfam_search import PfamSearch
 class Markers():
     """Read marker information."""
 
-    def __init__(self):
+    def __init__(self, marker_dir):
         """Initialization."""
 
         self.logger = logging.getLogger('timestamp')
 
-        pfam_bac_ms, pfam_ar_ms = PfamSearch.get_marker_genes()
-        tigr_bac_ms, tigr_ar_ms = TigrfamSearch.get_marker_genes()
+        pfam_bac_ms, pfam_ar_ms = PfamSearch(marker_dir).get_marker_genes()
+        tigr_bac_ms, tigr_ar_ms = TigrfamSearch(marker_dir).get_marker_genes()
 
         self.bac_ms = pfam_bac_ms.union(tigr_bac_ms)
         self.ar_ms = pfam_ar_ms.union(tigr_ar_ms)

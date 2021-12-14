@@ -34,7 +34,6 @@ class OptionsParser():
         """Initialization"""
 
         self.logger = logging.getLogger('timestamp')
-        self.reporter = logging.getLogger('no_timestamp')
 
     def _bin_extension(self, bin_dir):
         """Determine extension of bins."""
@@ -68,9 +67,8 @@ class OptionsParser():
                         f'No bins identified for {method_id} in {d}.')
                 else:
                     bin_dirs[method_id] = (d, bin_ext)
-                    self.logger.info("Processing {} genomes from {} with extension '{}'.".format(count,
-                                                                                                 method_id,
-                                                                                                 bin_ext))
+                    self.logger.info(
+                        f"Processing {count} genomes from {method_id} with extension '{bin_ext}'.")
 
         if hasattr(options, 'bin_file') and options.bin_file:
             check_file_exists(options.bin_file)
@@ -91,9 +89,8 @@ class OptionsParser():
                             f'No bins identified for {method_id} in {d}.')
                     else:
                         bin_dirs[method_id] = (d, bin_ext)
-                        self.logger.info("Processing {} genomes from {} with extension '{}'.".format(count,
-                                                                                                     method_id,
-                                                                                                     bin_ext))
+                        self.logger.info(
+                            f"Processing {count} genomes from {method_id} with extension '{bin_ext}'.")
 
         return bin_dirs
 
@@ -111,8 +108,8 @@ class OptionsParser():
         bin.coverage(options.bam_files, options.cov_file)
         bin.run(options)
 
-        self.logger.info("UniteM 'bin' results written to: %s" %
-                         options.output_dir)
+        self.logger.info(
+            f"UniteM 'bin' results written to: {options.output_dir}")
 
     def profile(self, options):
         """Profile command"""
@@ -123,10 +120,11 @@ class OptionsParser():
 
         profile = Profile(options.cpus)
         profile.run(bin_dirs,
+                    options.marker_dir,
                     options.output_dir)
 
-        self.logger.info("UniteM 'profile' results written to: %s" %
-                         options.output_dir)
+        self.logger.info(
+            f"UniteM 'profile' results written to: {options.output_dir}")
 
     def consensus(self, options):
         """Consensus command"""
@@ -139,6 +137,7 @@ class OptionsParser():
         e = Ensemble(options.bin_prefix)
         e.run(options.profile_dir,
               bin_dirs,
+              options.marker_dir,
               options.weight,
               options.sel_min_quality,
               options.sel_min_comp,
@@ -153,7 +152,7 @@ class OptionsParser():
               options.output_dir)
 
         self.logger.info(
-            "UniteM 'consensus' results written to: %s" % options.output_dir)
+            f"UniteM 'consensus' results written to: {options.output_dir}")
 
     def greedy(self, options):
         """Greedy command"""
@@ -166,6 +165,7 @@ class OptionsParser():
         e = Ensemble(options.bin_prefix)
         e.run(options.profile_dir,
               bin_dirs,
+              options.marker_dir,
               options.weight,
               options.sel_min_quality,
               options.sel_min_comp,
@@ -179,8 +179,8 @@ class OptionsParser():
               options.simple_headers,
               options.output_dir)
 
-        self.logger.info("UniteM 'greedy' results written to: %s" %
-                         options.output_dir)
+        self.logger.info(
+            f"UniteM 'greedy' results written to: {options.output_dir}")
 
     def unanimous(self, options):
         """Unanimous command"""
@@ -193,6 +193,7 @@ class OptionsParser():
         e = Ensemble(options.bin_prefix)
         e.run(options.profile_dir,
               bin_dirs,
+              options.marker_dir,
               options.weight,
               options.sel_min_quality,
               options.sel_min_comp,
@@ -207,7 +208,7 @@ class OptionsParser():
               options.output_dir)
 
         self.logger.info(
-            "UniteM 'unanimous' results written to: %s" % options.output_dir)
+            f"UniteM 'unanimous' results written to: {options.output_dir}")
 
     def compare(self, options):
         """Compare command"""
@@ -252,8 +253,8 @@ class OptionsParser():
         elif(options.subparser_name == 'unique'):
             self.unique(options)
         else:
-            self.logger.error('Unknown UniteM command: ' +
-                              options.subparser_name + '\n')
+            self.logger.error(
+                f'Unknown UniteM command: {options.subparser_name}\n')
             sys.exit(1)
 
         return 0

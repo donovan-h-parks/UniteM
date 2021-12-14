@@ -85,7 +85,7 @@ class Ensemble():
 
                 bm_gene_tables[bin_id] = updated_table
 
-    def _bin_quality(self, bins, contigs, gene_tables, quality_weight):
+    def _bin_quality(self, bins, contigs, gene_tables, quality_weight, markers):
         """Determine estimated completeness, contamination, and quality of bins.
 
         Parameters
@@ -98,13 +98,13 @@ class Ensemble():
           Marker gene tables for bins in each binning method.
         quality_weight : float
           Weight given to contamination when assessing genome quality.
+        markers : Markers
+          Marker genes used to evaluate quality of genomes.
 
         Return
         ------
           List with bin metadata sorted by quality, then N50, the genome size.
         """
-
-        markers = Markers()
 
         q = []
         for binning_method in gene_tables:
@@ -515,6 +515,7 @@ class Ensemble():
     def run(self,
             profile_dir,
             bin_dirs,
+            marker_dir,
             quality_weight,
             sel_min_quality,
             sel_min_comp,
@@ -561,7 +562,7 @@ class Ensemble():
           Output directory.
         """
 
-        markers = Markers()
+        markers = Markers(marker_dir)
 
         if greedy:
             self.logger.info("Greedy selection with quality_weight = {:.1f}, sel_min_quality = {:.1f}, sel_min_comp = {:.1f}, and sel_max_cont = {:.1f}.".format(
@@ -667,7 +668,8 @@ class Ensemble():
             bin_quality = self._bin_quality(bins,
                                             contigs,
                                             gene_tables,
-                                            quality_weight)
+                                            quality_weight,
+                                            markers)
 
             matched_sets = self._matched_bin_sets(bins,
                                                   contig_lens,

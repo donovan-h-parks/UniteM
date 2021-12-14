@@ -32,7 +32,7 @@ TIGRFAM_OUT = '_tigrfam.out'
 class TigrfamSearch(object):
     """Runs TIGRFAM HMMs over a set of genomes."""
 
-    def __init__(self, cpus):
+    def __init__(self, marker_dir, cpus):
         """Initialization."""
 
         self.logger = logging.getLogger('timestamp')
@@ -40,9 +40,16 @@ class TigrfamSearch(object):
         self.cpus = cpus
 
         # file with TIGRfam HMMs
-        hmm_file = os.path.join(TigrfamSearch.hmm_dir(), 'tigrfam.hmm')
-        self.tigrfam_hmms = os.path.abspath(hmm_file)
-        self.logger.info(f' - using TIGRfam HMMs in: {self.tigrfam_hmms}')
+        if marker_dir is None:
+            hmm_file = os.path.join(TigrfamSearch.hmm_dir(), 'tigrfam.hmm')
+            self.marker_dir = TigrfamSearch.hmm_dir()
+            self.tigrfam_hmms = os.path.abspath(hmm_file)
+        else:
+            self.marker_dir = marker_dir
+            self.tigrfam_hmms = os.path.abspath(
+                os.path.join(marker_dir, 'tigrfam.hmm'))
+
+        self.logger.info(f' - using TIGRfam HMMs in: {marker_dir}')
 
     @staticmethod
     def version():
@@ -72,17 +79,16 @@ class TigrfamSearch(object):
 
         return hmm_dir
 
-    @staticmethod
-    def get_marker_genes():
+    def get_marker_genes(self):
         """Get bacterial and archaeal PFAM marker genes."""
 
         bac_ms = set()
-        with open(os.path.join(TigrfamSearch.hmm_dir(), 'tigr_bac.lst')) as f:
+        with open(os.path.join(self.marker_dir, 'tigr_bac.lst')) as f:
             for line in f:
                 bac_ms.add(line.strip())
 
         ar_ms = set()
-        with open(os.path.join(TigrfamSearch.hmm_dir(), 'tigr_ar.lst')) as f:
+        with open(os.path.join(self.marker_dir, 'tigr_ar.lst')) as f:
             for line in f:
                 ar_ms.add(line.strip())
 

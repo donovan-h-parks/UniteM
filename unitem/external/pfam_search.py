@@ -32,13 +32,19 @@ PFAM_OUT = '_pfam.out'
 class PfamSearch(object):
     """Runs pfam_search.pl over a set of genomes."""
 
-    def __init__(self, cpus):
+    def __init__(self, marker_dir, cpus):
         """Initialization."""
 
         self.cpus = cpus
 
         self.logger = logging.getLogger('timestamp')
-        self.logger.info(f' - using Pfam HMMs in: {PfamSearch.hmm_dir()}')
+
+        if marker_dir is None:
+            self.marker_dir = PfamSearch.hmm_dir()
+        else:
+            self.marker_dir = marker_dir
+
+        self.logger.info(f' - using Pfam HMMs in: {marker_dir}')
 
     @staticmethod
     def hmm_dir():
@@ -50,17 +56,16 @@ class PfamSearch(object):
 
         return hmm_dir
 
-    @staticmethod
-    def get_marker_genes():
+    def get_marker_genes(self):
         """Get bacterial and archaeal PFAM marker genes."""
 
         bac_ms = set()
-        with open(os.path.join(PfamSearch.hmm_dir(), 'pfam_bac.lst')) as f:
+        with open(os.path.join(self.marker_dir, 'pfam_bac.lst')) as f:
             for line in f:
                 bac_ms.add(line.strip())
 
         ar_ms = set()
-        with open(os.path.join(PfamSearch.hmm_dir(), 'pfam_ar.lst')) as f:
+        with open(os.path.join(self.marker_dir, 'pfam_ar.lst')) as f:
             for line in f:
                 ar_ms.add(line.strip())
 
@@ -113,7 +118,7 @@ class PfamSearch(object):
 
             pfam_scan = PfamScan(cpu=self.cpus_per_genome,
                                  fasta=gene_file,
-                                 dir=PfamSearch.hmm_dir())
+                                 dir=self.marker_dir)
             pfam_scan.search()
             pfam_scan.write_results(output_hit_file, None, None, None, None)
 

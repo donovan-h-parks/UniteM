@@ -73,7 +73,7 @@ class Prodigal(object):
                 f'Cannot call Prodigal on empty genome: {genome_file}')
             return None
 
-        with tempfile.TemporaryDirectory('unitem_tmp_') as tmp_dir:
+        with tempfile.TemporaryDirectory() as tmp_dir:
 
             # determine number of bases
             total_bases = sum(len(seq) for seq in seqs.values())
@@ -102,9 +102,11 @@ class Prodigal(object):
                 tt_tmp_dir = os.path.join(tmp_dir, str(trans_table))
                 os.makedirs(tt_tmp_dir)
                 aa_gene_file_tmp = os.path.join(
-                    tt_tmp_dir, gid + AA_GENE_FILE_SUFFIX)
+                    tt_tmp_dir,
+                    f'{gid}{AA_GENE_FILE_SUFFIX}')
                 nt_gene_file_tmp = os.path.join(
-                    tt_tmp_dir, gid + NT_GENE_FILE_SUFFIX)
+                    tt_tmp_dir,
+                    f'{gid}{NT_GENE_FILE_SUFFIX}')
                 gff_file_tmp = os.path.join(tt_tmp_dir, gid + '.gff')
 
                 # check if there is sufficient bases to calculate prodigal parameters
@@ -141,7 +143,8 @@ class Prodigal(object):
 
             # determine best translation table
             trans_table_file = os.path.join(
-                self.output_dir, 'translation_table.tsv')
+                self.output_dir,
+                f'{gid}_translation_table.tsv')
             trans_table_out = open(trans_table_file, 'w')
             trans_table_out.write('Table\tCoding density\n')
             trans_table_out.write(f'4\t{table_coding_density[4]:.3f}\n')
@@ -162,10 +165,10 @@ class Prodigal(object):
 
             best_tt_dir = os.path.join(tmp_dir, str(best_tt))
             shutil.copyfile(os.path.join(
-                best_tt_dir, gid + AA_GENE_FILE_SUFFIX), aa_gene_file)
+                best_tt_dir, f'{gid}{AA_GENE_FILE_SUFFIX}'), aa_gene_file)
             shutil.copyfile(os.path.join(
-                best_tt_dir, gid + NT_GENE_FILE_SUFFIX), nt_gene_file)
-            shutil.copyfile(os.path.join(best_tt_dir, gid + '.gff'), gff_file)
+                best_tt_dir, f'{gid}{NT_GENE_FILE_SUFFIX}'), nt_gene_file)
+            shutil.copyfile(os.path.join(best_tt_dir, f'{gid}.gff'), gff_file)
 
         return aa_gene_file, nt_gene_file, gff_file, trans_table_file
 
@@ -201,6 +204,7 @@ class Prodigal(object):
             if data is None:
                 break
 
+            num_processed += 1
             status = f' -> processed {num_processed:,} of {num_genomes:,} genomes'
             sys.stdout.write(f'{status}\r')
             sys.stdout.flush()

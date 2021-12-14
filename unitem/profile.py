@@ -46,11 +46,26 @@ class Profile():
 
         self.cpus = cpus
 
-    def _genome_quality(self, gids, result_dir):
+    def _genome_quality(self, gids, result_dir, tigr_search, pfam_search):
         """Determine genome quality based on presence/absence of marker genes."""
 
-        pfam_bac_ms, pfam_ar_ms = PfamSearch.get_marker_genes()
-        tigr_bac_ms, tigr_ar_ms = TigrfamSearch.get_marker_genes()
+        pfam_bac_ms, pfam_ar_ms = pfam_search.get_marker_genes()
+        tigr_bac_ms, tigr_ar_ms = tigr_search.get_marker_genes()
+
+        bac_ms = pfam_bac_ms.union(tigr_bac_ms)
+        ar_ms = pfam_ar_ms.union(tigr_ar_ms)
+
+        fout_bac = open(os.path.join(result_dir, 'bac_hits.tsv'), 'w')
+        fout_bac.write('Genome ID')
+        for ms in bac_ms:
+            fout_bac.write(f'\t{ms}')
+        fout_bac.write('\n')
+
+        fout_ar = open(os.path.join(result_dir, 'ar_hits.tsv'), 'w')
+        fout_ar.write('Genome ID')
+        for ms in ar_ms:
+            fout_ar.write(f'\t{ms}')
+        fout_ar.write('\n')
 
         genome_qual = {}
         for gid in gids:
@@ -78,17 +93,31 @@ class Profile():
 
             bac_comp, bac_cont = Markers.estimate_comp_cont(
                 hmm_hits,
-                pfam_bac_ms.union(tigr_bac_ms)
+                bac_ms
             )
 
             ar_comp, ar_cont = Markers.estimate_comp_cont(
                 hmm_hits,
-                pfam_ar_ms.union(tigr_ar_ms))
+                ar_ms
+            )
 
             if bac_comp + bac_cont > ar_comp + ar_cont:
                 genome_qual[gid] = ('Bacteria', bac_comp, bac_cont)
+
+                fout_bac.write(f'{gid}')
+                for ms in bac_ms:
+                    fout_bac.write(f'\t{len(hmm_hits[ms])}')
+                fout_bac.write('\n')
             else:
                 genome_qual[gid] = ('Archaea', bac_comp, bac_cont)
+
+                fout_ar.write(f'{gid}')
+                for ms in ar_ms:
+                    fout_ar.write(f'\t{len(hmm_hits[ms])}')
+                fout_ar.write('\n')
+
+        fout_bac.close()
+        fout_ar.close()
 
         return genome_qual
 
@@ -171,13 +200,15 @@ class Profile():
 
         fout.close()
 
-    def run(self, bin_dirs, output_dir):
+    def run(self, bin_dirs, marker_dir, output_dir):
         """Profile genomes in each bin directory.
 
         Parameters
         ----------
         bin_dirs : list of str
             Directories containing bins from different binning methods.
+        marker_dir : str
+            Directory containing Pfam and TIGRfam marker gene data.
         output_dir : str
             Output directory.
         """
@@ -189,7 +220,7 @@ class Profile():
         prodigal = Prodigal(self.cpus)
         for method_id, (bin_dir, bin_ext) in bin_dirs.items():
             num_processed += 1
-            self.logger.info('Profiling {} ({} of {}).'.format(
+            self.logger.info('Profiling {} ({} of {}):'.format(
                 method_id,
                 num_processed,
                 len(bin_dirs)))
@@ -205,7 +236,7 @@ class Profile():
 
             # identify genes using Prodigal
             self.logger.info(
-                f' - identifying marker genes in {len(genomes)} genomes')
+                f' - identifying marker genes in {len(genomes):,} genomes')
 
             method_dir = os.path.join(output_dir,
                                       BINNING_METHOD_DIR,
@@ -218,16 +249,19 @@ class Profile():
             self.logger.info(' - identifying TIGRFAM markers')
             aa_gene_files = [prodigal_files[gid]['aa_gene_path']
                              for gid in prodigal_files.keys()]
-            tigr_search = TigrfamSearch(self.cpus)
+            tigr_search = TigrfamSearch(marker_dir, self.cpus)
             tigr_search.run(aa_gene_files, tmp_marker_gene_dir, method_dir)
 
             # annotate genes against Pfam database
             self.logger.info(' - identifying Pfam markers')
-            pfam_search = PfamSearch(self.cpus)
+            pfam_search = PfamSearch(marker_dir, self.cpus)
             pfam_search.run(aa_gene_files, tmp_marker_gene_dir,  method_dir)
 
             genome_quality[method_id] = self._genome_quality(
-                genomes, method_dir)
+                genomes,
+                method_dir,
+                tigr_search,
+                pfam_search)
 
             shutil.rmtree(tmp_marker_gene_dir)
 

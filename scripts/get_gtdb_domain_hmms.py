@@ -95,15 +95,19 @@ class GetHMMs():
         # write out selected markers
         with open(os.path.join(output_dir, f'tigr_bac.lst'), 'w') as f:
             f.write('\n'.join(bac_tigr_markers))
+            f.write('\n')
 
         with open(os.path.join(output_dir, f'tigr_ar.lst'), 'w') as f:
             f.write('\n'.join(ar_tigr_markers))
+            f.write('\n')
 
         with open(os.path.join(output_dir, f'pfam_bac.lst'), 'w') as f:
             f.write('\n'.join(bac_pfam_markers))
+            f.write('\n')
 
         with open(os.path.join(output_dir, f'pfam_ar.lst'), 'w') as f:
             f.write('\n'.join(ar_pfam_markers))
+            f.write('\n')
 
         # get TIGRFAM HMMs
         tigr_hmms = self.read_hmms(self.TIGRFAM_HMMS)
