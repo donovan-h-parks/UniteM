@@ -49,7 +49,7 @@ class TigrfamSearch(object):
             self.tigrfam_hmms = os.path.abspath(
                 os.path.join(marker_dir, 'tigrfam.hmm'))
 
-        self.logger.info(f' - using TIGRfam HMMs in: {marker_dir}')
+        self.logger.info(f' - using TIGRfam HMMs in: {self.marker_dir}')
 
     @staticmethod
     def version():

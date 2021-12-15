@@ -129,8 +129,10 @@ class Prodigal(object):
                     proc.communicate()
                     exit_code = proc.wait()
                     if exit_code != 0:
-                        raise ProdigalException(
+                        self.logger.error(
                             'Prodigal returned non-zero exit code.')
+                        self.logger.error(f'Skipping genome {gid}.')
+                        return None
 
                 prodigalParser = ProdigalGeneFeatureParser(gff_file_tmp)
 

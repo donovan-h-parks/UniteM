@@ -186,18 +186,6 @@ class PlotCommonBases():
                     rect.stroke(color='rgb(196,196,196)', width=0.1)
                     table_group.add(rect)
 
-                    if False:
-                        t = dwg.text('%d' % perc_cb,
-                                     x=[(x + 0.5*self.col_width)],
-                                     y=[(y + 0.5*self.row_height +
-                                         0.5*self.cell_font_size)],
-                                     font_size="%fpt" % self.cell_font_size,
-                                     #style = "font-weight:bold",
-                                     text_anchor='middle',
-                                     direction='ltr',
-                                     fill='rgb(0,0,0)')
-                        table_group.add(t)
-
     def _render_legend(self, dwg):
         """Render legend."""
 
@@ -206,8 +194,8 @@ class PlotCommonBases():
 
         x = self.fig_size_x
         y = 0
-        base_color, base_size = self._cell_properties(0)
-        for index, perc_common_bases in enumerate([100, 90, 80, 70, 60, 50]):
+        _base_color, base_size = self._cell_properties(0)
+        for perc_common_bases in [100, 90, 80, 70, 60, 50]:
             color, size = self._cell_properties(perc_common_bases)
             rect = dwg.rect(insert=(x+0.5*(base_size - size),
                                     y+0.5*(base_size - size)),
@@ -219,12 +207,11 @@ class PlotCommonBases():
             legend_str = '%d' % perc_common_bases
             if perc_common_bases != 100:
                 legend_str = '>' + legend_str
+
             t = dwg.text(legend_str,
                          x=[(x + base_size + self.cell_offset)],
                          y=[(y + 0.5*base_size + 0.5*self.font_size)],
                          font_size="%fpt" % self.font_size,
-                         #style = "font-weight:bold",
-                         # text_anchor='middle',
                          direction='ltr',
                          fill='rgb(0,0,0)')
             legend_group.add(t)

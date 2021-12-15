@@ -130,7 +130,7 @@ class GetHMMs():
             for marker in pfram_markers:
                 f.write(pfam_dat[marker])
 
-    def parse_metadata(self, metadata_file, min_comp, max_cont):
+    def parse_metadata(self, metadata_file, qc_passed):
         """Parse GTDB genome metadata."""
 
         GenomeQuality = namedtuple('GenomeQuality', 'comp cont')
@@ -154,7 +154,8 @@ class GetHMMs():
                 cont = float(tokens[cont_idx])
                 gtdb_rep = tokens[gtdb_rep_idx].lower().startswith('t')
 
-                if gtdb_rep and comp >= min_comp and cont <= max_cont:
+                if gtdb_rep and gid in qc_passed:
+                    comp, cont = qc_passed[gid]
                     genome_qual[gid] = GenomeQuality(comp, cont)
 
                     gtdb_taxa = [t.strip()
@@ -216,8 +217,9 @@ class GetHMMs():
         sorted_mgs = sorted(marker_genes)
         sorted_mgs_str = '\t'.join(sorted_mgs)
         fout.write('Phylum\tNo. genomes\tAvg. single copy')
+        fout.write(f'\tNo. genes >50% single copy')
         fout.write(f'\tNo. genes >={min_single_copy}% single copy')
-        fout.write(f'{sorted_mgs_str}\n')
+        fout.write(f'\t{sorted_mgs_str}\n')
 
         for phylum in sorted(phylum_gids):
             cur_gids = phylum_gids[phylum]
@@ -234,22 +236,71 @@ class GetHMMs():
 
             fout.write(f'\t{np_mean(mg_rates):.2f}')
 
+            num_mv_rate = sum([1 for r in mg_rates if r > 50])
+            fout.write(f'\t{num_mv_rate:,}')
+
             num_sc_rate = sum([1 for r in mg_rates if r >= min_single_copy])
             fout.write(f'\t{num_sc_rate:,}')
+
             for mg_rate in mg_rates:
                 fout.write(f'\t{mg_rate:.2f}')
             fout.write('\n')
+
+    def filter_mg_across_phyla(self, min_phyla_rate, taxonomy, marker_genes, genome_mgs):
+        """Filter marker genes that are not predominately single copy across the majority of phyla."""
+
+        phylum_gids = defaultdict(list)
+        for gid, taxa in taxonomy.items():
+            phylum = taxa[Taxonomy.PHYLUM_INDEX]
+            phylum_gids[phylum].append(gid)
+
+        filtered_mgs = set()
+        for mg in marker_genes:
+            phyla_sc_count = 0
+            for phylum, gids in phylum_gids.items():
+                gid_count = 0
+                for gid in gids:
+                    if mg in genome_mgs[gid]:
+                        gid_count += 1
+
+                if 100.0*gid_count/len(gids) >= min_phyla_rate:
+                    phyla_sc_count += 1
+
+            if 100.0*phyla_sc_count/len(phylum_gids) < min_phyla_rate:
+                filtered_mgs.add(mg)
+
+        return filtered_mgs
 
     def run(self,
             gtdb_bac_hits_file,
             gtdb_ar_hits_file,
             gtdb_bac_metadata_file,
             gtdb_ar_metadata_file,
+            checkm_v2_rep_file,
             min_comp,
             max_cont,
             min_single_copy,
+            min_phyla_rate,
             output_dir):
         """Get uniquitious, single-copy genes across GTDB species."""
+
+        # get CheckM v2 quality estimates
+        qc_passed = {}
+        with open(checkm_v2_rep_file) as f:
+            header = f.readline().rstrip().split('\t')
+
+            comp_idx = header.index('Completeness')
+            cont_idx = header.index('Contamination')
+
+            for line in f:
+                tokens = line.rstrip().split('\t')
+
+                comp = float(tokens[comp_idx])
+                cont = float(tokens[cont_idx])
+
+                if comp >= min_comp and cont <= max_cont:
+                    gid = canonical_gid(tokens[0])
+                    qc_passed[gid] = (comp, cont)
 
         # get representative genomes meeting quality criteria
         bac_qual = None
@@ -263,11 +314,7 @@ class GetHMMs():
             self.logger.info(
                 f'Identifying {domain} genomes meeting quality criteria:')
 
-            gtdb_taxonomy = {}
-            cur_qual, cur_taxonomy = self.parse_metadata(
-                domain_metadata_file,
-                min_comp,
-                max_cont)
+            cur_qual, cur_taxonomy = self.parse_metadata(domain_metadata_file, qc_passed)
             self.logger.info(
                 f' - identified {len(cur_qual):,} genomes passing QC')
 
@@ -286,7 +333,8 @@ class GetHMMs():
                 ar_qual = cur_qual
                 ar_taxonomy = cur_taxonomy
 
-        # get ubiqutious, single-copy bacterial marker genes
+        # get ubiqutious, single-copy bacterial marker genes across
+        # all GTDB species representatives
         bac_mg = None
         ar_mg = None
         bac_genome_mgs = None
@@ -314,6 +362,23 @@ class GetHMMs():
             else:
                 ar_mg = cur_mg
                 ar_genome_mgs = cur_genome_mgs
+
+        # remove marker genes that are not predominately single copy across all phyla
+        self.logger.info('Identifying marker genes not predominately single copy across the majority of phyla:')
+
+        filtered_bac_mgs = self.filter_mg_across_phyla(min_phyla_rate, bac_taxonomy, bac_mg, bac_genome_mgs)
+        for mg in filtered_bac_mgs:
+            del bac_mg[mg]
+
+        self.logger.info(f' - removed {len(filtered_bac_mgs):,} bacterial marker genes')
+        self.logger.info(f' - retained {len(bac_mg):,} bacterial marker genes')
+
+        filtered_ar_mgs = self.filter_mg_across_phyla(min_phyla_rate, ar_taxonomy, ar_mg, ar_genome_mgs)
+        for mg in filtered_ar_mgs:
+            del ar_mg[mg]
+
+        self.logger.info(f' - removed {len(filtered_ar_mgs):,} archaeal marker genes')
+        self.logger.info(f' - retained {len(ar_mg):,} archaeal marker genes')
 
         # create table indicating single-copy rate of genes for each phylum
         bac_table = os.path.join(output_dir, 'phylum_mg_table_bac.tsv')
@@ -362,6 +427,8 @@ if __name__ == '__main__':
                         help="GTDB metadata for bacterial genomes (e.g., bac120_metadata_r202.tsv)")
     parser.add_argument('gtdb_ar_metadata_file',
                         help="GTDB metadata for bacterial genomes (e.g., ar122_metadata_r202.tsv)")
+    parser.add_argument('checkm_v2_rep_file',
+                        help="file with CheckM v2 estimates for GTDB representative genomes")
     parser.add_argument('output_dir',
                         help="output director")
 
@@ -370,11 +437,15 @@ if __name__ == '__main__':
                         type=float, default=95.0)
     parser.add_argument('--max_cont',
                         help="maximum contamination to consider genome",
-                        type=float, default=2.5)
+                        type=float, default=5.0)
 
     parser.add_argument('--min_single_copy',
                         help="minimum single-copy rate of marker gene",
                         type=float, default=95.0)
+
+    parser.add_argument('--min_phyla_rate',
+                        help="minimum single-copy rate of marker gene within and across phyla",
+                        type=float, default=75.0)
 
     parser.add_argument('--silent',
                         help="suppress output of logger", action='store_true')
@@ -394,9 +465,11 @@ if __name__ == '__main__':
             args.gtdb_ar_hits_file,
             args.gtdb_bac_metadata_file,
             args.gtdb_ar_metadata_file,
+            args.checkm_v2_rep_file,
             args.min_comp,
             args.max_cont,
             args.min_single_copy,
+            args.min_phyla_rate,
             args.output_dir)
     except SystemExit:
         print("\nControlled exit resulting from an unrecoverable error or warning.")

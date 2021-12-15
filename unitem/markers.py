@@ -35,8 +35,9 @@ class Markers():
 
         self.logger = logging.getLogger('timestamp')
 
-        pfam_bac_ms, pfam_ar_ms = PfamSearch(marker_dir).get_marker_genes()
-        tigr_bac_ms, tigr_ar_ms = TigrfamSearch(marker_dir).get_marker_genes()
+        pfam_bac_ms, pfam_ar_ms = PfamSearch(marker_dir, 1).get_marker_genes()
+        tigr_bac_ms, tigr_ar_ms = TigrfamSearch(
+            marker_dir, 1).get_marker_genes()
 
         self.bac_ms = pfam_bac_ms.union(tigr_bac_ms)
         self.ar_ms = pfam_ar_ms.union(tigr_ar_ms)

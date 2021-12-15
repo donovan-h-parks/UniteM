@@ -44,7 +44,7 @@ class PfamSearch(object):
         else:
             self.marker_dir = marker_dir
 
-        self.logger.info(f' - using Pfam HMMs in: {marker_dir}')
+        self.logger.info(f' - using Pfam HMMs in: {self.marker_dir}')
 
     @staticmethod
     def hmm_dir():
