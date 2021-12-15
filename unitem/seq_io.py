@@ -240,3 +240,27 @@ def read_fasta(fasta_file, keep_annotation=False):
         sys.exit(1)
 
     return seqs
+
+
+def write_fasta(seqs, output_file):
+    """Write sequences to fasta file.
+    If the output file has the extension 'gz',
+    it will be compressed using gzip.
+    
+    Parameters
+    ----------
+    seqs : dict[seq_id] -> seq
+        Sequences indexed by sequence id.
+    output_file : str
+        Name of fasta file to produce.
+    """
+
+    if output_file.endswith('.gz'):
+        fout = gzip.open(output_file, 'wb')
+    else:
+        fout = open(output_file, 'w')
+
+    for seq_id, seq in seqs.items():
+        fout.write('>' + seq_id + '\n')
+        fout.write(seq + '\n')
+    fout.close()

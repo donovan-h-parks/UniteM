@@ -95,7 +95,6 @@ class Bin():
         if options.max40 or options.max107:
             self.logger.info('Checking MaxBin dependencies.')
             check_on_path('run_MaxBin.pl')
-            check_on_path('FragGeneScan')
         if (options.mb_verysensitive
                 or options.mb_sensitive
                 or options.mb_specific

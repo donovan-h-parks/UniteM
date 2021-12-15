@@ -66,8 +66,8 @@ class Ensemble():
 
         Parameters
         ----------
-        gene_tables : d[binning method] -> (bac gene table, ar gene table)
-          Bacterial and archaeal marker gene tables for bins in each binning method.
+        gene_tables : d[binning method] -> gene table
+          Marker gene tables for bins in each binning method.
         cids_to_remove : iterable
           Contigs to remove from marker gene tables.
         """
@@ -75,21 +75,17 @@ class Ensemble():
         cids_to_remove = set(cids_to_remove)
 
         # remove contigs from other bins
-        for binning_method, (bac_gene_tables, ar_gene_tables) in gene_tables.items():
-            for bin_id in bac_gene_tables:
-                for marker_id, contig_ids in bac_gene_tables[bin_id].items():
-                    bac_gene_tables[bin_id][marker_id] = []
+        for bm_gene_tables in gene_tables.values():
+            for bin_id in bm_gene_tables:
+                updated_table = defaultdict(list)
+                for marker_id, contig_ids in bm_gene_tables[bin_id].items():
                     for cid in contig_ids:
                         if cid not in cids_to_remove:
-                            bac_gene_tables[bin_id][marker_id].append(cid)
+                            updated_table[marker_id].append(cid)
 
-                for marker_id, contig_ids in ar_gene_tables[bin_id].items():
-                    ar_gene_tables[bin_id][marker_id] = []
-                    for cid in contig_ids:
-                        if cid not in cids_to_remove:
-                            ar_gene_tables[bin_id][marker_id].append(cid)
+                bm_gene_tables[bin_id] = updated_table
 
-    def _bin_quality(self, bins, contigs, gene_tables, quality_weight):
+    def _bin_quality(self, bins, contigs, gene_tables, quality_weight, markers):
         """Determine estimated completeness, contamination, and quality of bins.
 
         Parameters
@@ -98,30 +94,35 @@ class Ensemble():
           Contigs for bins across all binning methods.
         contigs : d[cid] -> seq
           Contigs across all bins.
-        gene_tables : d[binning method] -> (bac gene table, ar gene table)
-          Bacterial and archaeal marker gene tables for bins in each binning method.
+        gene_tables : d[binning method] -> gene table
+          Marker gene tables for bins in each binning method.
         quality_weight : float
           Weight given to contamination when assessing genome quality.
+        markers : Markers
+          Marker genes used to evaluate quality of genomes.
 
         Return
         ------
           List with bin metadata sorted by quality, then N50, the genome size.
         """
 
-        markers = Markers()
-
         q = []
-        for bm, (bac_gene_tables, ar_gene_tables) in gene_tables.items():
-            for bid in bac_gene_tables:
-                domain, comp, cont = markers.evaluate(bac_gene_tables[bid],
-                                                      ar_gene_tables[bid])
+        for binning_method in gene_tables:
+            for bid, gene_table in gene_tables[binning_method].items():
+                domain, comp, cont = markers.evaluate(gene_table)
 
-                bin_seqs = [contigs[cid] for cid in bins[bm][bid]]
-                n50, l50, m50 = calculateN50L50M50(bin_seqs)
+                bin_seqs = [contigs[cid] for cid in bins[binning_method][bid]]
+                n50, _l50, _m50 = calculateN50L50M50(bin_seqs)
                 genome_size = sum([len(s) for s in bin_seqs])
 
-                q.append((bm, bid, domain, comp, cont, comp -
-                         quality_weight*cont, n50, genome_size))
+                q.append((binning_method,
+                          bid,
+                          domain,
+                          comp,
+                          cont,
+                          comp - quality_weight*cont,
+                          n50,
+                          genome_size))
 
         # sort bins by quality follwed by N50 followed by genome size, and
         # break remaining ties randomly
@@ -387,7 +388,6 @@ class Ensemble():
                      sel_bins,
                      merged_bins,
                      quality_weight,
-                     report_min_quality,
                      markers,
                      summary_file):
         """Summarize quality of reported bins."""
@@ -471,19 +471,21 @@ class Ensemble():
     def _read_init_bin_quality(self, profile_dir):
         """Read quality of each bin as determined by the profile command."""
 
-        init_bin_quality = defaultdict(lambda: {})
+        bq = defaultdict(lambda: {})
         for f in os.listdir(profile_dir):
-            if f.endswith('_quality.tsv'):
-                method_id = f.replace('_quality.tsv', '')
-                with open(os.path.join(profile_dir, f)) as f:
-                    f.readline()
+            if not f.endswith('_quality.tsv'):
+                continue
 
-                    for line in f:
-                        bid, domain, comp, cont, q = line.strip().split('\t')
-                        init_bin_quality[method_id][bid] = (
-                            domain, float(comp), float(cont))
+            method_id = f.replace('_quality.tsv', '')
+            with open(os.path.join(profile_dir, f)) as f:
+                f.readline()
 
-        return init_bin_quality
+                for line in f:
+                    tokens = line.strip().split('\t')
+                    bid, domain, comp, cont, _ = tokens
+                    bq[method_id][bid] = (domain, float(comp), float(cont))
+
+        return bq
 
     def _write_initial_contig_state(self,
                                     methods_sorted,
@@ -513,6 +515,7 @@ class Ensemble():
     def run(self,
             profile_dir,
             bin_dirs,
+            marker_dir,
             quality_weight,
             sel_min_quality,
             sel_min_comp,
@@ -559,24 +562,24 @@ class Ensemble():
           Output directory.
         """
 
-        markers = Markers()
+        markers = Markers(marker_dir)
 
         if greedy:
-            self.logger.info("Greedy selection with quality_weight = %.1f, sel_min_quality = %.1f, sel_min_comp = %.1f, and sel_max_cont = %.1f." % (
+            self.logger.info("Greedy selection with quality_weight = {:.1f}, sel_min_quality = {:.1f}, sel_min_comp = {:.1f}, and sel_max_cont = {:.1f}.".format(
                 quality_weight, sel_min_quality, sel_min_comp, sel_max_cont))
             remove_perc = 101
             add_perc = 101
         elif unanimous:
-            self.logger.info("Unanimous selection with quality_weight = %.1f, sel_min_quality = %.1f, sel_min_comp = %.1f, and sel_max_cont = %.1f." % (
+            self.logger.info("Unanimous selection with quality_weight = {:.1f}, sel_min_quality = {:.1f}, sel_min_comp = {:.1f}, and sel_max_cont = {:.1f}.".format(
                 quality_weight, sel_min_quality, sel_min_comp, sel_max_cont))
         else:
-            self.logger.info("Consensus selection with quality_weight = %.1f, sel_min_quality = %.1f, sel_min_comp = %.1f, and sel_max_cont = %.1f." % (
+            self.logger.info("Consensus selection with quality_weight ={:.1f}, sel_min_quality = {:.1f}, sel_min_comp = {:.1f}, and sel_max_cont = {:.1f}.".format(
                 quality_weight, sel_min_quality, sel_min_comp, sel_max_cont))
-            self.logger.info('Removing and adding contigs by consensus with remove_perc = %.1f, add_perc = %.1f, add_matches = %d.' % (
+            self.logger.info('Removing and adding contigs by consensus with remove_perc = {:.1f}, add_perc = {:.1f}, add_matches = {:,}.'.format(
                 remove_perc, add_perc, add_matches))
 
-        self.logger.info('Reporting bins with a quality >= %.1f.' %
-                         report_min_quality)
+        self.logger.info(
+            'Reporting bins with a quality >= {:.1f}.'.format(report_min_quality))
 
         # get scaffold IDs in bins across all binning methods
         self.logger.info('Reading all bins.')
@@ -588,7 +591,9 @@ class Ensemble():
         # get marker genes for bins across all binning methods
         self.logger.info('Identifying marker genes across all bins.')
         gene_tables = markers.marker_gene_tables(
-            profile_dir, binning_methods=bins.keys())
+            profile_dir,
+            binning_methods=bins.keys()
+        )
 
         # create output directories
         bin_dir = os.path.join(output_dir, 'bins')
@@ -640,7 +645,7 @@ class Ensemble():
         fout_contigs.write(
             'UniteM Bin ID\tContig ID\tNo. Matched Bins\tNo. Unmatched Bins\tNo. Degenerate Bins\tNo. Unbinned')
         for method in methods_sorted:
-            fout_contigs.write('\t%s' % method)
+            fout_contigs.write(f'\t{method}')
         fout_contigs.write('\n')
 
         plot_dir = os.path.join(output_dir, 'common_bases')
@@ -652,7 +657,6 @@ class Ensemble():
         total_comp = 0
         total_cont = 0
         total_quality = 0
-        sel_gene_tables = {}
         sel_bins = {}
         selected_rows = {}
         unitem_common_bases = defaultdict(lambda: defaultdict(int))
@@ -664,7 +668,8 @@ class Ensemble():
             bin_quality = self._bin_quality(bins,
                                             contigs,
                                             gene_tables,
-                                            quality_weight)
+                                            quality_weight,
+                                            markers)
 
             matched_sets = self._matched_bin_sets(bins,
                                                   contig_lens,
@@ -673,6 +678,7 @@ class Ensemble():
                                                   sel_min_comp,
                                                   sel_max_cont,
                                                   greedy)
+
             if len(matched_sets) == 0:
                 break  # no bins meeting selection criteria
 
@@ -691,6 +697,7 @@ class Ensemble():
                 unanimous)
 
             _domain, comp, cont = markers.bin_quality(new_bin)
+
             quality = comp - quality_weight*cont
             if quality < report_min_quality:
                 break
@@ -733,7 +740,7 @@ class Ensemble():
                     quality))
 
             for bm, bid, q, _n50, _gs in matched_sets[0]:
-                domain, comp, cont = markers.bin_quality(bins[bm][bid])
+                _domain, comp, cont = markers.bin_quality(bins[bm][bid])
                 quality = comp - quality_weight*cont
                 fout_matched.write('\t{}\t{:.1f}\t{:.1f}\t{:.1f}'.format(
                     bm + '~' + bid,
@@ -754,7 +761,7 @@ class Ensemble():
 
             for bm, bid, perc_common in matches:
                 unitem_common_bases[unitem_bin_id][bm] = perc_common
-                domain, comp, cont = markers.bin_quality(orig_bins[bm][bid])
+                _domain, comp, cont = markers.bin_quality(orig_bins[bm][bid])
                 quality = comp - quality_weight*cont
                 fout_bin_info.write('\t{}\t{:.1f}\t{:.1f}\t{:.1f}\t{:.1f}'.format(
                     bm + '~' + bid,
@@ -852,9 +859,6 @@ class Ensemble():
             self._update_gene_tables(gene_tables, new_bin.keys())
             self._update_bins(bins, new_bin.keys())
 
-            # cache selected gene tables and bin
-            sel_gene_tables[unitem_bin_id] = markers.create_gene_table(
-                new_bin.keys())
             sel_bins[unitem_bin_id] = new_bin
 
         self.logger.info(f'Selected {bin_num} bins.')
@@ -877,6 +881,5 @@ class Ensemble():
         self._bin_summary(sel_bins,
                           {},
                           quality_weight,
-                          report_min_quality,
                           markers,
                           summary_file)

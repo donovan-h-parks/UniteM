@@ -1,3 +1,6 @@
+1.0.0
+- initial release using GTDB-derived marker genes instead of using CheckM
+
 0.1.1
 - removed last dependency on biolib
 

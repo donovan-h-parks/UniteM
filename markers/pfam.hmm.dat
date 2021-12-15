@@ -1,0 +1,236 @@
+# STOCKHOLM 1.0
+#=GF ID   Fibrillarin
+#=GF AC   PF01269.18
+#=GF DE   Fibrillarin
+#=GF GA   20.60; 20.60;
+#=GF TP   Domain
+#=GF ML   226
+#=GF CL   CL0063
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L10
+#=GF AC   PF00466.21
+#=GF DE   Ribosomal protein L10
+#=GF GA   22.80; 22.80;
+#=GF TP   Family
+#=GF ML   100
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L1
+#=GF AC   PF00687.22
+#=GF DE   Ribosomal protein L1p/L10e family
+#=GF GA   32.20; 32.20;
+#=GF TP   Domain
+#=GF ML   204
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   RNA_pol_Rpb5_C
+#=GF AC   PF01191.20
+#=GF DE   RNA polymerase Rpb5, C-terminal domain
+#=GF GA   21.30; 21.30;
+#=GF TP   Domain
+#=GF ML   73
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S19e
+#=GF AC   PF01090.20
+#=GF DE   Ribosomal protein S19e
+#=GF GA   29.40; 29.40;
+#=GF TP   Family
+#=GF ML   137
+#=GF CL   CL0123
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   RNA_pol_A_bac
+#=GF AC   PF01000.27
+#=GF DE   RNA polymerase Rpb3/RpoA insert domain
+#=GF GA   33.90; 33.90;
+#=GF TP   Domain
+#=GF ML   112
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S3Ae
+#=GF AC   PF01015.19
+#=GF DE   Ribosomal S3Ae family
+#=GF GA   29.30; 29.30;
+#=GF TP   Family
+#=GF ML   195
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L15e
+#=GF AC   PF00827.18
+#=GF DE   Ribosomal L15
+#=GF GA   21.70; 21.70;
+#=GF TP   Family
+#=GF ML   189
+#=GF CL   CL0652
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S8
+#=GF AC   PF00410.20
+#=GF DE   Ribosomal protein S8
+#=GF GA   24.00; 24.00;
+#=GF TP   Domain
+#=GF ML   126
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   RNA_pol_L_2
+#=GF AC   PF13656.7
+#=GF DE   RNA polymerase Rpb3/Rpb11 dimerisation domain
+#=GF GA   27.00; 27.00;
+#=GF TP   Domain
+#=GF ML   75
+#=GF CL   CL0509
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S6e
+#=GF AC   PF01092.20
+#=GF DE   Ribosomal protein S6e
+#=GF GA   26.00; 26.00;
+#=GF TP   Family
+#=GF ML   125
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   EIF_2_alpha
+#=GF AC   PF07541.13
+#=GF DE   Eukaryotic translation initiation factor 2 alpha subunit
+#=GF GA   22.80; 22.80;
+#=GF TP   Family
+#=GF ML   114
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   DUF655
+#=GF AC   PF04919.13
+#=GF DE   Protein of unknown function (DUF655)
+#=GF GA   22.20; 22.20;
+#=GF TP   Family
+#=GF ML   181
+#=GF CL   CL0198
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   SRP_SPB
+#=GF AC   PF02978.20
+#=GF DE   Signal peptide binding domain
+#=GF GA   20.40; 20.40;
+#=GF TP   Domain
+#=GF ML   100
+#=GF CL   CL0123
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   UPF0086
+#=GF AC   PF01868.17
+#=GF DE   Domain of unknown function UPF0086
+#=GF GA   21.00; 21.00;
+#=GF TP   Family
+#=GF ML   87
+#=GF CL   CL0639
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S9
+#=GF AC   PF00380.20
+#=GF DE   Ribosomal protein S9/S16
+#=GF GA   22.10; 22.10;
+#=GF TP   Family
+#=GF ML   121
+#=GF CL   CL0329
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S28e
+#=GF AC   PF01200.19
+#=GF DE   Ribosomal protein S28e
+#=GF GA   25.00; 25.00;
+#=GF TP   Family
+#=GF ML   64
+#=GF CL   CL0021
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L19e
+#=GF AC   PF01280.21
+#=GF DE   Ribosomal protein L19e
+#=GF GA   25.00; 25.00;
+#=GF TP   Family
+#=GF ML   144
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Nop
+#=GF AC   PF01798.19
+#=GF DE   snoRNA binding domain, fibrillarin
+#=GF GA   25.40; 17.10;
+#=GF TP   Family
+#=GF ML   232
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_S4e
+#=GF AC   PF00900.21
+#=GF DE   Ribosomal family S4e
+#=GF GA   25.00; 25.00;
+#=GF TP   Family
+#=GF ML   75
+#=GF CL   CL0021
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   RNA_pol_N
+#=GF AC   PF01194.18
+#=GF DE   RNA polymerases N / 8 kDa subunit
+#=GF GA   26.90; 26.90;
+#=GF TP   Domain
+#=GF ML   59
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L21e
+#=GF AC   PF01157.19
+#=GF DE   Ribosomal protein L21e
+#=GF GA   21.60; 21.60;
+#=GF TP   Family
+#=GF ML   101
+#=GF CL   CL0107
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L32e
+#=GF AC   PF01655.19
+#=GF DE   Ribosomal protein L32
+#=GF GA   25.00; 25.00;
+#=GF TP   Family
+#=GF ML   108
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Ribosomal_L31e
+#=GF AC   PF01198.20
+#=GF DE   Ribosomal protein L31e
+#=GF GA   25.00; 25.00;
+#=GF TP   Family
+#=GF ML   82
+//
+//
+# STOCKHOLM 1.0
+#=GF ID   Diphthamide_syn
+#=GF AC   PF01866.18
+#=GF DE   Putative diphthamide synthesis protein
+#=GF GA   33.20; 33.20;
+#=GF TP   Family
+#=GF ML   302
+//
+//
