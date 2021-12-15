@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 import os
 
@@ -24,7 +24,7 @@ if __name__ == '__main__':
         author_email='donovan.parks@gmail.com',
         maintainer='Donovan Parks',
         maintainer_email='donovan.parks@gmail.com',
-        packages=['unitem'],
+        packages=find_packages(),
         scripts=['bin/unitem'],
         package_data={'unitem': ['VERSION', '../markers/*']},
         url='http://pypi.python.org/pypi/unitem/',
@@ -33,9 +33,10 @@ if __name__ == '__main__':
         classifiers=[
             'Development Status :: 4 - Beta',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+            'Intended Audience :: Science/Research',
             'Natural Language :: English',
-            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
-        install_requires=["svgwrite>=1.1.9"],
+        install_requires=["numpy>=1.0", "svgwrite>=1.1.9"],
     )

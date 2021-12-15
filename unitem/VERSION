@@ -1,3 +1,9 @@
+1.0.2
+- added numpy as a dependency
+
+1.0.1
+- fixed setup.py to include all required packages
+
 1.0.0
 - initial release using GTDB-derived marker genes instead of using CheckM
 
