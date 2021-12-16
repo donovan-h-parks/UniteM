@@ -1,3 +1,6 @@
+1.0.3
+- fix bug with progress indicator for identifying Pfam and TIGRfam markers
+
 1.0.2
 - added numpy as a dependency
 
