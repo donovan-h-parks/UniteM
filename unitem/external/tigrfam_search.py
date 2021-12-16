@@ -171,6 +171,7 @@ class TigrfamSearch(object):
             if data is None:
                 break
 
+            num_processed += 1
             status = f' -> processed {num_processed:,} of {num_genomes:,} genomes'
             sys.stdout.write(f'{status}\r')
             sys.stdout.flush()
