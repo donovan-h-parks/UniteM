@@ -29,6 +29,13 @@ TIGRFAM_SUFFIX = "_tigrfam.tsv"
 TIGRFAM_OUT = '_tigrfam.out'
 
 
+class TigrfamException(Exception):
+    """Exception for errors associated with running HMMER with TIGRfam marker genes."""
+
+    def __init__(self, message=''):
+        Exception.__init__(self, message)
+
+
 class TigrfamSearch(object):
     """Runs TIGRFAM HMMs over a set of genomes."""
 
@@ -143,6 +150,12 @@ class TigrfamSearch(object):
             hmmsearch_out = os.path.join(gene_dir, filename.replace(AA_GENE_FILE_SUFFIX,
                                                                     TIGRFAM_OUT))
 
+            if os.path.exists(output_hit_file) and os.path.exists(hmmsearch_out):
+                # use previously calculated results
+                queue_out.put(gene_file)
+                continue
+
+            # identify TIGRfam marker genes
             cmd = ['hmmsearch', '--noali', '--notextw', '--cut_nc',
                    '-o', hmmsearch_out,
                    '--tblout', output_hit_file,
@@ -154,7 +167,9 @@ class TigrfamSearch(object):
             if p.returncode != 0:
                 self.logger.error(
                     f'Non-zero exit code returned when running hmmsearch: {stderr}')
-                sys.exit(1)
+                self.logger.error(f'Skipping {filename}.')
+
+                return None
 
             # identify top hit for each gene
             self._top_hit(output_hit_file, output_dir)
@@ -218,15 +233,12 @@ class TigrfamSearch(object):
             for p in worker_proc:
                 p.join()
 
+                if p.exitcode != 0:
+                    raise TigrfamException(
+                        'HMMER returned non-zero exit code.')
+
             writer_queue.put(None)
             write_proc.join()
-
-            for proc in worker_proc:
-                if proc.exitcode != 0:
-                    self.logger.error(
-                        'An error was encountered while running hmmsearch.')
-                    sys.exit(1)
-
         except Exception:
             for p in worker_proc:
                 p.terminate()

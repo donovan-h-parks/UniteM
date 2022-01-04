@@ -29,6 +29,13 @@ PFAM_SUFFIX = "_pfam.tsv"
 PFAM_OUT = '_pfam.out'
 
 
+class PfamException(Exception):
+    """Exception for errors associated with running HMMER with Pfam marker genes."""
+
+    def __init__(self, message=''):
+        Exception.__init__(self, message)
+
+
 class PfamSearch(object):
     """Runs pfam_search.pl over a set of genomes."""
 
@@ -116,6 +123,12 @@ class PfamSearch(object):
             output_hit_file = os.path.join(gene_dir, filename.replace(AA_GENE_FILE_SUFFIX,
                                                                       PFAM_SUFFIX))
 
+            if os.path.exists(output_hit_file):
+                # use previously calculated results
+                queue_out.put(gene_file)
+                continue
+
+            # identify Pfam marker genes
             pfam_scan = PfamScan(cpu=self.cpus_per_genome,
                                  fasta=gene_file,
                                  dir=self.marker_dir)
@@ -183,10 +196,10 @@ class PfamSearch(object):
 
             for p in worker_proc:
                 p.join()
+
                 if p.exitcode != 0:
-                    self.logger.error(
-                        'An error was encountered while running hmmsearch.')
-                    sys.exit(1)
+                    raise PfamException(
+                        'HMMER returned non-zero exit code.')
 
             writer_queue.put(None)
             write_proc.join()

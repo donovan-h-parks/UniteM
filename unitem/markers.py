@@ -57,8 +57,11 @@ class Markers():
                 present += 1
                 multi_copy_count += len(hits) - 1
 
-        perc_comp = 100 * float(present) / len(markers)
-        perc_cont = 100 * float(multi_copy_count) / len(markers)
+        if len(markers) > 0:
+            perc_comp = 100 * float(present) / len(markers)
+            perc_cont = 100 * float(multi_copy_count) / len(markers)
+        else:
+            perc_comp = perc_cont = 0
 
         return perc_comp, perc_cont
 

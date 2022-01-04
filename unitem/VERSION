@@ -1,3 +1,7 @@
+1.0.4
+- better handling of genomes that fail with Prodigal or HMMER
+- make use of previously calculated results for calling genes and identifying marker genes
+
 1.0.3
 - fix bug with progress indicator for identifying Pfam and TIGRfam markers
 
