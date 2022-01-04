@@ -5,11 +5,10 @@
 
 UniteM is a software toolkit implementing different ensemble binning strategies for producing a non-redundant set of bins from the output of multiple binning methods.
 
-## History
+## Major version history
 
-- **1.0.2**: fixed minor issues with installation via pip
-- **1.0.0**: removed CheckM; genome quality estimated using marker genes identified across [GTDB](https://gtdb.ecogenomic.org/) species representatives using [Prodigal](https://github.com/hyattpd/Prodigal) and [HMMER](http://hmmer.org/); see [UniteM manual](https://github.com/dparks1134/UniteM/blob/master/unitem_manual.pdf) for details
-- **0.0.18**: used CheckM and CheckM marker sets to evaluate the quality of genomes during ensembly binning; used in the [draft UniteM](https://github.com/dparks1134/UniteM/blob/master/unitem_ms.draft.pdf) manuscript
+- **>=1.0.0**: removed CheckM; genome quality estimated using marker genes identified across [GTDB](https://gtdb.ecogenomic.org/) species representatives using [Prodigal](https://github.com/hyattpd/Prodigal) and [HMMER](http://hmmer.org/); see [UniteM manual](https://github.com/dparks1134/UniteM/blob/master/unitem_manual.pdf) for details
+- **<1.0.0**: used CheckM and CheckM marker sets to evaluate the quality of genomes during ensembly binning; used in the [draft UniteM](https://github.com/dparks1134/UniteM/blob/master/unitem_ms.draft.pdf) manuscript
 
 ## Installation
 
