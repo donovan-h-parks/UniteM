@@ -66,6 +66,23 @@ class Prodigal(object):
     def _run_prodigal(self, gid, genome_file):
         """Run Prodigal."""
 
+        # check if genome has previously been processed
+        trans_table_file = os.path.join(
+            self.output_dir,
+            f'{gid}_translation_table.tsv')
+        aa_gene_file = os.path.join(
+            self.output_dir, f'{gid}{AA_GENE_FILE_SUFFIX}')
+        nt_gene_file = os.path.join(
+            self.output_dir, f'{gid}{NT_GENE_FILE_SUFFIX}')
+        gff_file = os.path.join(self.output_dir, f'{gid}.gff')
+
+        if (os.path.exists(trans_table_file)
+            and os.path.exists(aa_gene_file)
+            and os.path.exists(nt_gene_file)
+                and os.path.exists(gff_file)):
+            # use previously calculated results
+            return aa_gene_file, nt_gene_file, gff_file, trans_table_file
+
         seqs = read_fasta(genome_file)
 
         if len(seqs) == 0:
@@ -144,9 +161,6 @@ class Prodigal(object):
                 table_coding_density[trans_table] = codingDensity
 
             # determine best translation table
-            trans_table_file = os.path.join(
-                self.output_dir,
-                f'{gid}_translation_table.tsv')
             trans_table_out = open(trans_table_file, 'w')
             trans_table_out.write('Table\tCoding density\n')
             trans_table_out.write(f'4\t{table_coding_density[4]:.3f}\n')
@@ -159,12 +173,6 @@ class Prodigal(object):
             trans_table_out.write(f'\nSelected table\t{best_tt}\n')
 
             # copy results for best translation table to desired output files
-            aa_gene_file = os.path.join(
-                self.output_dir, f'{gid}{AA_GENE_FILE_SUFFIX}')
-            nt_gene_file = os.path.join(
-                self.output_dir, f'{gid}{NT_GENE_FILE_SUFFIX}')
-            gff_file = os.path.join(self.output_dir, f'{gid}.gff')
-
             best_tt_dir = os.path.join(tmp_dir, str(best_tt))
             shutil.copyfile(os.path.join(
                 best_tt_dir, f'{gid}{AA_GENE_FILE_SUFFIX}'), aa_gene_file)

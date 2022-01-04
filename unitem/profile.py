@@ -236,7 +236,7 @@ class Profile():
 
             # identify genes using Prodigal
             self.logger.info(
-                f' - identifying marker genes in {len(genomes):,} genomes')
+                f' - identifying genes in {len(genomes):,} genomes using Prodigal')
 
             method_dir = os.path.join(output_dir,
                                       BINNING_METHOD_DIR,
@@ -246,14 +246,14 @@ class Profile():
             prodigal_files = prodigal.run(genomes, tmp_marker_gene_dir)
 
             # annotated genes against TIGRFAM database
-            self.logger.info(' - identifying TIGRFAM markers')
+            self.logger.info(' - identifying TIGRFAM markers using HMMER')
             aa_gene_files = [prodigal_files[gid]['aa_gene_path']
                              for gid in prodigal_files.keys()]
             tigr_search = TigrfamSearch(marker_dir, self.cpus)
             tigr_search.run(aa_gene_files, tmp_marker_gene_dir, method_dir)
 
             # annotate genes against Pfam database
-            self.logger.info(' - identifying Pfam markers')
+            self.logger.info(' - identifying Pfam markers using HMMER')
             pfam_search = PfamSearch(marker_dir, self.cpus)
             pfam_search.run(aa_gene_files, tmp_marker_gene_dir,  method_dir)
 
