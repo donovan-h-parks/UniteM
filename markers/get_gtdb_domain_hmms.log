@@ -1,0 +1,46 @@
+[2022-01-11 08:53:41] INFO: get_gtdb_domain_hmms.py v0.0.1
+[2022-01-11 08:53:41] INFO: get_gtdb_domain_hmms.py ../auxillary_data/gtdb_r202_bac120_multi_hits.tsv ../auxillary_data/gtdb_r202_ar122_multi_hits.tsv ../auxillary_data/bac120_metadata_r202.tsv ../auxillary_data/ar122_metadata_r202.tsv ../auxillary_data/checkm_v2_r202.tsv ../auxillary_data/alt_marker_assign_r202.tsv ../markers/
+[2022-01-11 08:53:42] INFO: Identifying bacterial genomes meeting quality criteria:
+[2022-01-11 08:53:48] INFO:  - identified 26,287 genomes passing QC
+[2022-01-11 08:53:48] INFO:  - completeness: 99.5 +/- 1.1
+[2022-01-11 08:53:48] INFO:  - contamination: 0.7 +/- 1.0
+[2022-01-11 08:53:48] INFO: Identifying archaeal genomes meeting quality criteria:
+[2022-01-11 08:53:48] INFO:  - identified 836 genomes passing QC
+[2022-01-11 08:53:48] INFO:  - completeness: 98.9 +/- 1.5
+[2022-01-11 08:53:48] INFO:  - contamination: 1.0 +/- 1.1
+[2022-01-11 08:53:48] INFO: Identifying ubiqutious, single-copy bacterial marker genes:
+[2022-01-11 08:53:52] INFO:  - identified 86 marker genes
+[2022-01-11 08:53:52] INFO:  - single-copy rate: 97.7 +/- 1.3
+[2022-01-11 08:53:52] INFO: Identifying ubiqutious, single-copy archaeal marker genes:
+[2022-01-11 08:53:53] INFO:  - identified 85 marker genes
+[2022-01-11 08:53:53] INFO:  - single-copy rate: 98.2 +/- 1.2
+[2022-01-11 08:53:53] INFO: Identifying marker genes not predominately single copy across the majority of phyla:
+[2022-01-11 08:53:54] INFO:  - removed 1 bacterial marker genes
+[2022-01-11 08:53:54] INFO:  - retained 85 bacterial marker genes
+[2022-01-11 08:53:54] INFO:  - removed 3 archaeal marker genes
+[2022-01-11 08:53:54] INFO:  - retained 82 archaeal marker genes
+[2022-01-11 08:53:55] INFO: Adding additional HMMs required to robustly annotate selected marker genes:
+[2022-01-11 08:54:38] INFO: get_gtdb_domain_hmms.py v0.0.1
+[2022-01-11 08:54:38] INFO: get_gtdb_domain_hmms.py ../auxillary_data/gtdb_r202_bac120_multi_hits.tsv ../auxillary_data/gtdb_r202_ar122_multi_hits.tsv ../auxillary_data/bac120_metadata_r202.tsv ../auxillary_data/ar122_metadata_r202.tsv ../auxillary_data/checkm_v2_r202.tsv ../auxillary_data/alt_marker_assign_r202.tsv ../markers/
+[2022-01-11 08:54:38] INFO: Identifying bacterial genomes meeting quality criteria:
+[2022-01-11 08:54:44] INFO:  - identified 26,287 genomes passing QC
+[2022-01-11 08:54:44] INFO:  - completeness: 99.5 +/- 1.1
+[2022-01-11 08:54:44] INFO:  - contamination: 0.7 +/- 1.0
+[2022-01-11 08:54:44] INFO: Identifying archaeal genomes meeting quality criteria:
+[2022-01-11 08:54:44] INFO:  - identified 836 genomes passing QC
+[2022-01-11 08:54:44] INFO:  - completeness: 98.9 +/- 1.5
+[2022-01-11 08:54:44] INFO:  - contamination: 1.0 +/- 1.1
+[2022-01-11 08:54:44] INFO: Identifying ubiqutious, single-copy bacterial marker genes:
+[2022-01-11 08:54:48] INFO:  - identified 86 marker genes
+[2022-01-11 08:54:48] INFO:  - single-copy rate: 97.7 +/- 1.3
+[2022-01-11 08:54:48] INFO: Identifying ubiqutious, single-copy archaeal marker genes:
+[2022-01-11 08:54:49] INFO:  - identified 85 marker genes
+[2022-01-11 08:54:49] INFO:  - single-copy rate: 98.2 +/- 1.2
+[2022-01-11 08:54:49] INFO: Identifying marker genes not predominately single copy across the majority of phyla:
+[2022-01-11 08:54:50] INFO:  - removed 1 bacterial marker genes
+[2022-01-11 08:54:50] INFO:  - retained 85 bacterial marker genes
+[2022-01-11 08:54:50] INFO:  - removed 3 archaeal marker genes
+[2022-01-11 08:54:50] INFO:  - retained 82 archaeal marker genes
+[2022-01-11 08:54:51] INFO: Adding additional HMMs required to robustly annotate selected marker genes:
+[2022-01-11 08:54:51] INFO:  - added 212 additional HMMs
+[2022-01-11 08:54:51] INFO: Pulling out TIGRfam and Pfam HMMs to: ../markers/

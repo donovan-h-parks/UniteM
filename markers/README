@@ -1,2 +1,14 @@
 Marker set inferred from GTDB R202 species representative genomes using the
 script get_gtdb_domain_hmms.py with default values.
+
+The files pfam_ar.lst, pfam_bac.lst, tigr_ar.lst, and tigr_bac.lst contain the
+set of Pfam and TIGRfam marker genes used to evaluate the completeness and
+contamination of archaeal and bacterial genomes.
+
+The pfam.hmm and tigrfam.hmm contain the HMM models. These file contain HMMs
+for the marker genes used to estimate genome quality along with additional 
+HMMs require to ensure these marker genes are robustly identified. These 
+additional HMMs are require to remove false positive annotations that would
+otherwise occur due to the high sequence similarity between certain Pfam
+and TIGRfam protein families.
+ 
