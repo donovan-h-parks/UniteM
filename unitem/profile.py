@@ -200,7 +200,7 @@ class Profile():
 
         fout.close()
 
-    def run(self, bin_dirs, marker_dir, output_dir):
+    def run(self, bin_dirs, marker_dir, keep_intermediate, output_dir):
         """Profile genomes in each bin directory.
 
         Parameters
@@ -241,7 +241,7 @@ class Profile():
             method_dir = os.path.join(output_dir,
                                       BINNING_METHOD_DIR,
                                       method_id)
-            tmp_marker_gene_dir = os.path.join(method_dir, 'tmp_marker_genes')
+            tmp_marker_gene_dir = os.path.join(method_dir, 'intermediate')
 
             prodigal_files = prodigal.run(genomes, tmp_marker_gene_dir)
 
@@ -263,6 +263,7 @@ class Profile():
                 tigr_search,
                 pfam_search)
 
-            shutil.rmtree(tmp_marker_gene_dir)
+            if not keep_intermediate:
+                shutil.rmtree(tmp_marker_gene_dir)
 
         self._report_genome_quality(genome_quality, output_dir)

@@ -121,6 +121,7 @@ class OptionsParser():
         profile = Profile(options.cpus)
         profile.run(bin_dirs,
                     options.marker_dir,
+                    options.keep_intermediate,
                     options.output_dir)
 
         self.logger.info(

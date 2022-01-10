@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-__prog_name__ = "gtdb_gtdb_domain_hmms.py"
+__prog_name__ = "get_gtdb_domain_hmms.py"
 __prog_desc__ = "Get uniquitious, single-copy genes across GTDB species"
 
 __author__ = 'Donovan Parks'
@@ -89,10 +89,12 @@ class GetHMMs():
                  bac_pfam_markers,
                  ar_tigr_markers,
                  ar_pfam_markers,
+                 added_hmms,
                  output_dir):
         """Pull out selected HMMs."""
 
-        # write out selected markers
+        # write out selected markers to be used for 
+        # completeness and contamination estimates
         with open(os.path.join(output_dir, f'tigr_bac.lst'), 'w') as f:
             f.write('\n'.join(bac_tigr_markers))
             f.write('\n')
@@ -112,6 +114,9 @@ class GetHMMs():
         # get TIGRFAM HMMs
         tigr_hmms = self.read_hmms(self.TIGRFAM_HMMS)
         tigr_markers = bac_tigr_markers.union(ar_tigr_markers)
+        for hmm_id in added_hmms:
+            if hmm_id.startswith('TIGR'):
+                tigr_markers.add(hmm_id)
 
         with open(os.path.join(output_dir, f'tigrfam.hmm'), 'w') as f:
             for marker in tigr_markers:
@@ -120,14 +125,17 @@ class GetHMMs():
         # get PFAM HMMs
         pfam_hmms = self.read_hmms(self.PFAM_HMMS)
         pfam_dat = self.read_pfam_dat(self.PFAM_HMMS)
-        pfram_markers = bac_pfam_markers.union(ar_pfam_markers)
+        pfam_markers = bac_pfam_markers.union(ar_pfam_markers)
+        for hmm_id in added_hmms:
+            if hmm_id.startswith('PF'):
+                pfam_markers.add(hmm_id)
 
         with open(os.path.join(output_dir, f'pfam.hmm'), 'w') as f:
-            for marker in pfram_markers:
+            for marker in pfam_markers:
                 f.write(pfam_hmms[marker])
 
         with open(os.path.join(output_dir, f'pfam.hmm.dat'), 'w') as f:
-            for marker in pfram_markers:
+            for marker in pfam_markers:
                 f.write(pfam_dat[marker])
 
     def parse_metadata(self, metadata_file, qc_passed):
@@ -140,8 +148,6 @@ class GetHMMs():
         with open(metadata_file) as f:
             header = f.readline().strip().split('\t')
 
-            comp_idx = header.index('checkm_completeness')
-            cont_idx = header.index('checkm_contamination')
             gtdb_rep_idx = header.index('gtdb_representative')
             gtdb_taxonomy_idx = header.index('gtdb_taxonomy')
 
@@ -149,9 +155,6 @@ class GetHMMs():
                 tokens = line.strip().split('\t')
 
                 gid = canonical_gid(tokens[0])
-
-                comp = float(tokens[comp_idx])
-                cont = float(tokens[cont_idx])
                 gtdb_rep = tokens[gtdb_rep_idx].lower().startswith('t')
 
                 if gtdb_rep and gid in qc_passed:
@@ -277,6 +280,7 @@ class GetHMMs():
             gtdb_bac_metadata_file,
             gtdb_ar_metadata_file,
             checkm_v2_rep_file,
+            alt_marker_assign,
             min_comp,
             max_cont,
             min_single_copy,
@@ -397,6 +401,32 @@ class GetHMMs():
             min_single_copy,
             ar_table)
 
+        # get additional markers required to ensure robust annotation
+        # of selected marker genes
+        self.logger.info('Adding additional HMMs required to robustly annotate selected marker genes:')
+        added_hmms = set()
+        if alt_marker_assign.lower() != 'none':
+            with open(alt_marker_assign) as f:
+                f.readline()
+
+                for line in f:
+                    tokens = line.strip().split('\t')
+
+                    hmm_id = tokens[0]
+                    alt_hits = tokens[1]
+                    
+                    for marker_info in alt_hits.split(';'):
+                        marker_id, _count = marker_info.split(':')
+                        if ((hmm_id in bac_mg or hmm_id in ar_mg) 
+                            and marker_id not in bac_mg
+                            and marker_id not in ar_mg):
+                            added_hmms.add(marker_id)
+
+        assert len(added_hmms.intersection(set(bac_mg))) == 0
+        assert len(added_hmms.intersection(set(ar_mg))) == 0
+
+        self.logger.info(f' - added {len(added_hmms):,} additional HMMs')
+
         # pull out bacterial TIGRFAM and Pfam HMMs
         self.logger.info(f'Pulling out TIGRfam and Pfam HMMs to: {output_dir}')
         bac_tigr_markers = set([mg for mg in bac_mg if mg.startswith('TIGR')])
@@ -407,6 +437,7 @@ class GetHMMs():
                       bac_pfam_markers,
                       ar_tigr_markers,
                       ar_pfam_markers,
+                      added_hmms,
                       output_dir)
 
         # create binary index for PFAM HMMs
@@ -429,6 +460,8 @@ if __name__ == '__main__':
                         help="GTDB metadata for bacterial genomes (e.g., ar122_metadata_r202.tsv)")
     parser.add_argument('checkm_v2_rep_file',
                         help="file with CheckM v2 estimates for GTDB representative genomes")
+    parser.add_argument('alt_marker_assign',
+                        help="file indicating correct annotations for incorrectly annotated genes classified using only the bac120 and ar122 HMMs")
     parser.add_argument('output_dir',
                         help="output director")
 
@@ -466,6 +499,7 @@ if __name__ == '__main__':
             args.gtdb_bac_metadata_file,
             args.gtdb_ar_metadata_file,
             args.checkm_v2_rep_file,
+            args.alt_marker_assign,
             args.min_comp,
             args.max_cont,
             args.min_single_copy,

@@ -146,6 +146,9 @@ if __name__ == '__main__':
         title='optional arguments')
     optional_group.add_argument('--marker_dir',
                                 help="directory containing Pfam and TIGRfam marker genes data")
+    optional_group.add_argument('--keep_intermediate',
+                                help="keep intermediate gene calling results",
+                                action='store_true')
     optional_group.add_argument('-c', '--cpus',
                                 help="number of CPUs",
                                 type=int, default=1)
