@@ -708,7 +708,7 @@ class Ensemble():
 
             # report selection
             bin_num += 1
-            unitem_bin_id = f'{self.bin_prefix}_{bin_num}'
+            unitem_bin_id = f'{self.bin_prefix}{bin_num}'
             unitem_bin_quality[unitem_bin_id] = (comp, cont)
             primary_bm, primary_bid, _q, _n50, _gs = matched_sets[0][0]
             self.logger.info("Selected {} from {} with quality = {:.1f} (comp. = {:.1f}%, cont. = {:.1f}%).".format(
