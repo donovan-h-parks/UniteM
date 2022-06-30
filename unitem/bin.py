@@ -140,7 +140,7 @@ class Bin():
     def _run_method(self, cmd, bin_dir, bin_file_out, binning_method):
         """Run binning method."""
 
-        run_cmd(cmd, program=binning_method)
+        run_cmd(cmd, program=binning_method, exit_on_fail=False)
 
         bin_file_out.write(f'{binning_method}\t{os.path.abspath(bin_dir)}\n')
 

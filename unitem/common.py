@@ -27,7 +27,7 @@ import unitem.seq_io as seq_io
 from unitem.defaults import *
 
 
-def run_cmd(cmd, program=None):
+def run_cmd(cmd, program=None, exit_on_fail=True):
     """Run external command."""
 
     logger = logging.getLogger('timestamp')
@@ -61,12 +61,18 @@ def run_cmd(cmd, program=None):
                     logger.info(out.rstrip())
 
         if proc.returncode != 0:
-            logger.error(f'Return code: {proc.returncode}')
-            sys.exit(1)
+            if exit_on_fail:
+                logger.error(f'Return code: {proc.returncode}')
+                sys.exit(1)
+            else:
+                logger.warning(f'Return code: {proc.returncode}')
+                return False
     except Exception as e:
         print(e)
         logger.error('Failed to execute command.')
         sys.exit(1)
+
+    return True
 
 
 def calculateN50L50M50(seqs):
