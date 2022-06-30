@@ -101,33 +101,6 @@ def calculateN50L50M50(seqs):
     return N50, L50, M50
 
 
-def parse_checkm_bin_stats(checkm_dir):
-    """Read bin statistics from file."""
-    bin_stats_file = os.path.join(
-        checkm_dir, 'storage', BIN_STATS_EXT_OUT)
-
-    bin_stats = {}
-    with open(bin_stats_file, 'r') as f:
-        for line in f:
-            line_split = line.split('\t')
-            bin_stats[line_split[0]] = ast.literal_eval(line_split[1])
-
-    return bin_stats
-
-
-def parse_bin_stats(profile_dir):
-    """Parse genomic and assembly statistics for bins."""
-
-    binning_methods_dir = os.path.join(profile_dir, BINNING_METHOD_DIR)
-    bin_stats = {}
-    for bm in os.listdir(binning_methods_dir):
-        checkm_dir = os.path.join(binning_methods_dir, bm, CHECKM_BAC_DIR)
-
-        bin_stats[bm] = parse_checkm_bin_stats(checkm_dir)
-
-    return bin_stats
-
-
 def read_bins(bin_dirs):
     """Read sequences in bins."""
 

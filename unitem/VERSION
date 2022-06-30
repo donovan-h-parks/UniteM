@@ -1,5 +1,8 @@
-1.1.1
+1.2.1
 - allow UniteM to continue even if a binning method (namely, MaxBin) finds no bins
+
+1.2.0
+- changed appending of prefix so it doesn't add an underscore; updated default prefix to "bin_"
 
 1.1.0
 - updated UniteM to include HMMs from closely related protein families to ensure accurate annotation of marker genes

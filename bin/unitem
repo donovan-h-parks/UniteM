@@ -207,7 +207,7 @@ if __name__ == '__main__':
                                 action='store_true')
     optional_group.add_argument('-p', '--bin_prefix',
                                 help="prefix for output bins",
-                                default='bin')
+                                default='bin_')
     optional_group.add_argument('--silent',
                                 help="suppress output of logger",
                                 action='store_true')
@@ -262,7 +262,7 @@ if __name__ == '__main__':
                                 action='store_true')
     optional_group.add_argument('-p', '--bin_prefix',
                                 help="prefix for output bins",
-                                default='bin')
+                                default='bin_')
     optional_group.add_argument('--silent',
                                 help="suppress output of logger",
                                 action='store_true')
@@ -318,7 +318,7 @@ if __name__ == '__main__':
                                 action='store_true')
     optional_group.add_argument('-p', '--bin_prefix',
                                 help="prefix for output bins",
-                                default='bin')
+                                default='bin_')
     optional_group.add_argument('--silent',
                                 help="suppress output of logger",
                                 action='store_true')
