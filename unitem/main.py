@@ -103,6 +103,7 @@ class OptionsParser():
         bin = Bin(options.assembly_file,
                   options.output_dir,
                   options.min_contig_len,
+                  options.seed,
                   options.cpus)
         bin.check_on_path(options)
         bin.coverage(options.bam_files, options.cov_file)

@@ -113,6 +113,9 @@ if __name__ == '__main__':
                                action='store_true')
 
     optional_group = bin_parser.add_argument_group(title='optional arguments')
+    optional_group.add_argument('-s', '--seed',
+                                help="set random seed; default is to use a random seed",
+                                type=int, default=0)
     optional_group.add_argument('-m', '--min_contig_len',
                                 help="minimum length of contigs to bin (>=1500 recommended)",
                                 type=int, default=2500)

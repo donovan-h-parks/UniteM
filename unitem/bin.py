@@ -30,7 +30,7 @@ from unitem.utils import check_on_path, make_sure_path_exists
 class Bin():
     """Apply binning methods to an assembly."""
 
-    def __init__(self, assembly_file, output_dir, min_contig_len, cpus):
+    def __init__(self, assembly_file, output_dir, min_contig_len, seed, cpus):
         """Initialization."""
 
         self.logger = logging.getLogger('timestamp')
@@ -38,6 +38,7 @@ class Bin():
         self.assembly_file = assembly_file
         self.output_dir = output_dir
         self.min_contig_len = min_contig_len
+        self.seed = seed
         self.cpus = cpus
 
         self.failed_methods = []
@@ -150,11 +151,13 @@ class Bin():
         self.logger.info("Running MetaBAT v2.")
         bin_dir = os.path.join(self.output_dir, 'metabat2')
         bin_prefix = os.path.join(bin_dir, 'mb2')
-        cmd = 'metabat2 -t {} -m {} -i {} -a {} -o {}'.format(self.cpus,
-                                                              self.min_contig_len,
-                                                              self.assembly_file,
-                                                              self.cov_file,
-                                                              bin_prefix)
+        cmd = 'metabat2 -t {} -s {} -m {} -i {} -a {} -o {}'.format(
+            self.cpus,
+            self.seed,
+            self.min_contig_len,
+            self.assembly_file,
+            self.cov_file,
+            bin_prefix)
 
         self._run_method(cmd, bin_dir, bin_file_out, 'metabat2')
 
@@ -164,12 +167,14 @@ class Bin():
         self.logger.info(f"Running MetaBAT v1 with the {preset} preset.")
         bin_dir = os.path.join(self.output_dir, f'metabat_{preset}')
         bin_prefix = os.path.join(bin_dir, f'mb_{preset}')
-        cmd = 'metabat1 -t {} -m {} -i {} -a {} -o {} --{}'.format(self.cpus,
-                                                                   self.min_contig_len,
-                                                                   self.assembly_file,
-                                                                   self.cov_file,
-                                                                   bin_prefix,
-                                                                   preset)
+        cmd = 'metabat1 -t {} -s {}-m {} -i {} -a {} -o {} --{}'.format(
+            self.cpus,
+            self.seed,
+            self.min_contig_len,
+            self.assembly_file,
+            self.cov_file,
+            bin_prefix,
+            preset)
 
         self._run_method(cmd, bin_dir, bin_file_out, f'metabat_{preset}')
 

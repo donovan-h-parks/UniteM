@@ -1,3 +1,6 @@
+1.2.2
+- added option to specify random seed
+
 1.2.1
 - allow UniteM to continue even if a binning method (namely, MaxBin) finds no bins
 
