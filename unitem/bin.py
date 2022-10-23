@@ -167,7 +167,7 @@ class Bin():
         self.logger.info(f"Running MetaBAT v1 with the {preset} preset.")
         bin_dir = os.path.join(self.output_dir, f'metabat_{preset}')
         bin_prefix = os.path.join(bin_dir, f'mb_{preset}')
-        cmd = 'metabat1 -t {} -s {}-m {} -i {} -a {} -o {} --{}'.format(
+        cmd = 'metabat1 -t {} -s {} -m {} -i {} -a {} -o {} --{}'.format(
             self.cpus,
             self.seed,
             self.min_contig_len,

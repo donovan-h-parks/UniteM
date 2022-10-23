@@ -1,3 +1,6 @@
+1.2.3
+- bug fix with invocation of MetaBAT
+
 1.2.2
 - added option to specify random seed
 
