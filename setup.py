@@ -38,5 +38,5 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 3',
             'Topic :: Scientific/Engineering :: Bio-Informatics',
         ],
-        install_requires=["numpy>=1.0", "svgwrite>=1.1.9"],
+        install_requires=["numpy>=1.24", "svgwrite>=1.1.9"],
     )

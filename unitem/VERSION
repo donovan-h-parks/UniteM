@@ -1,3 +1,6 @@
+1.2.5
+- updated numpy bool to bool_ to be compatible with latest versions of NumPy
+
 1.2.4
 - additional bug fix to invocation of MetaBAT v1 and v2
 

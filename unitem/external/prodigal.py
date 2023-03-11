@@ -26,7 +26,7 @@ import multiprocessing as mp
 from unitem.seq_io import read_fasta, write_fasta
 from unitem.utils import make_sure_path_exists
 
-from numpy import (sum as np_sum, zeros as np_zeros, bool as np_bool)
+from numpy import (sum as np_sum, zeros as np_zeros, bool_ as np_bool)
 
 
 AA_GENE_FILE_SUFFIX = '_genes.faa'
